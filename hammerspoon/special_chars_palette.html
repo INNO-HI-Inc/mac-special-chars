@@ -69,14 +69,50 @@ button.g.long { font-size: 12px; letter-spacing: 1px; padding: 0 10px; grid-colu
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .status b { color: var(--ink); }
+.sigrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.sigbtn {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
+  padding: 8px 13px; border: none; cursor: pointer; text-align: left;
+  background: color-mix(in srgb, var(--accent) 10%, var(--card));
+  color: var(--ink); border-radius: 10px; font-size: 13px;
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+.sigbtn:hover { background: var(--chip); }
+.sigbtn:active { transform: scale(0.96); }
+.sigbtn .sn { font-weight: 700; white-space: nowrap; }
+.sigbtn .sp {
+  color: var(--sub); font-weight: 400; font-size: 11.5px;
+  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sealrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.sealbtn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 82px; padding: 8px 6px; border: none; cursor: pointer;
+  background: var(--card); border-radius: 12px; color: var(--ink);
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+.sealbtn:hover { background: var(--chip); }
+.sealbtn:active { transform: scale(0.95); }
+.sealbtn img { width: 58px; height: 58px; object-fit: contain; background: #fff; border-radius: 8px; }
+.sealbtn .seal-nm { font-size: 10.5px; color: var(--sub); max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 2; }
+button.g.sel { background: var(--chip); }
 </style></head>
 <body>
 <div class="panel">
   <div class="top">
     <span class="stamp">ㅁ</span>
     <input id="q" placeholder="검색: 별, 초성(ㅂㅈ), ㅁ참고…" autocomplete="off" spellcheck="false">
-    <span class="hint">Enter=첫 항목 입력 · ⌘=복사만 · Esc 닫기</span>
+    <span class="hint">←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · Esc 닫기</span>
     <button id="x" title="닫기 (Esc)">✕</button>
+  </div>
+  <div class="sec" id="seal-sec" hidden>
+    <div class="lbl"><span class="dot" style="background:var(--c1)"></span>인감 · 도장</div>
+    <div class="sealrow" id="seal-row"></div>
+  </div>
+  <div class="sec" id="sig-sec" hidden>
+    <div class="lbl"><span class="dot" style="background:var(--accent)"></span>내 서명</div>
+    <div class="sigrow" id="sig-row"></div>
   </div>
   <div class="sec" id="recent-sec" hidden>
     <div class="lbl"><span class="dot" style="background:var(--sub)"></span>최근</div>
@@ -116,18 +152,65 @@ function filter() {
   });
   document.querySelectorAll(".sec").forEach(sec => {
     if (sec.id === "recent-sec" && sec.hidden) return;
+    if (sec.id === "seal-sec" || sec.id === "sig-sec") { if (!sec.hidden) sec.style.display = raw ? "none" : ""; return; }
     const any = [...sec.querySelectorAll("button.g")].some(b => b.style.display !== "none");
     sec.style.display = any ? "" : "none";
   });
+  refreshSel();
 }
 q.addEventListener("input", filter);
+// ---- 키보드 커서: 파란 테두리로 현재 위치, 방향키 이동, Enter 입력 ----
+let sel = null;
+function focusables() {
+  return [...document.querySelectorAll(".sec:not([hidden]) .sealbtn, .sec:not([hidden]) .sigbtn, .sec:not([hidden]) button.g")]
+    .filter(el => el.offsetParent !== null && el.style.display !== "none");
+}
+function setSel(el) {
+  if (sel && sel !== el) sel.classList.remove("sel");
+  sel = el || null;
+  if (sel) { sel.classList.add("sel"); sel.scrollIntoView({ block: "nearest" }); }
+}
+function refreshSel() {
+  const items = focusables();
+  if (!items.length) { if (sel) { sel.classList.remove("sel"); sel = null; } return; }
+  if (!sel || !items.includes(sel)) setSel(items[0]);
+}
+function colsOf(el) {
+  const grid = el.parentElement;
+  if (!grid) return 1;
+  const kids = [...grid.children].filter(c => c.offsetParent !== null && c.style.display !== "none");
+  if (!kids.length) return 1;
+  const top0 = kids[0].offsetTop; let n = 0;
+  for (const k of kids) { if (k.offsetTop === top0) n++; else break; }
+  return Math.max(1, n);
+}
+function navSel(dir) {
+  const items = focusables();
+  if (!items.length) return;
+  let i = sel ? items.indexOf(sel) : -1;
+  if (i < 0) { setSel(items[0]); return; }
+  let ni = i;
+  if (dir === "right") ni = i + 1;
+  else if (dir === "left") ni = i - 1;
+  else if (dir === "down") ni = i + colsOf(items[i]);
+  else if (dir === "up") ni = i - colsOf(items[i]);
+  if (ni < 0) ni = 0;
+  if (ni >= items.length) ni = items.length - 1;
+  setSel(items[ni]);
+}
+function activate(el, cmd) {
+  if (!el) return;
+  if (el.matches("button.g")) pick(el, cmd);
+  else el.click();
+}
 document.addEventListener("keydown", ev => {
   if (ev.isComposing || ev.keyCode === 229) return;
   if (ev.key === "Escape") { ev.preventDefault(); post({ action: "close" }); return; }
-  if (ev.key === "Enter" && ev.target === q) {
-    const first = visibleButtons()[0];
-    if (first) { ev.preventDefault(); pick(first, ev.metaKey); }
-  }
+  if (ev.key === "Enter") { ev.preventDefault(); activate(sel || focusables()[0], ev.metaKey); return; }
+  if (ev.key === "ArrowRight") { ev.preventDefault(); navSel("right"); return; }
+  if (ev.key === "ArrowLeft") { ev.preventDefault(); navSel("left"); return; }
+  if (ev.key === "ArrowDown") { ev.preventDefault(); navSel("down"); return; }
+  if (ev.key === "ArrowUp") { ev.preventDefault(); navSel("up"); return; }
 });
 window.setRecent = function (chars) {
   const sec = document.getElementById("recent-sec");
@@ -141,6 +224,43 @@ window.setRecent = function (chars) {
     if (src) row.appendChild(src.cloneNode(true));
   });
   sec.hidden = row.children.length === 0;
+  refreshSel();
+};
+window.setSeals = function (list) {
+  const sec = document.getElementById("seal-sec");
+  const row = document.getElementById("seal-row");
+  row.innerHTML = "";
+  (Array.isArray(list) ? list : []).forEach(s => {
+    if (!s || !s.id) return;
+    const b = document.createElement("button");
+    b.className = "sealbtn"; b.type = "button";
+    b.title = (s.name || "인감") + " 이미지 복사";
+    if (s.img) { const im = document.createElement("img"); im.src = s.img; im.alt = s.name || "인감"; b.appendChild(im); }
+    const nm = document.createElement("div"); nm.className = "seal-nm"; nm.textContent = s.name || "인감";
+    b.appendChild(nm);
+    b.addEventListener("click", () => post({ action: "seal", id: s.id, name: s.name || "인감" }));
+    row.appendChild(b);
+  });
+  sec.hidden = row.children.length === 0;
+  refreshSel();
+};
+window.setSignatures = function (sigs) {
+  const sec = document.getElementById("sig-sec");
+  const row = document.getElementById("sig-row");
+  row.innerHTML = "";
+  (Array.isArray(sigs) ? sigs : []).forEach(sig => {
+    if (!sig || typeof sig.text !== "string" || !sig.text) return;
+    const b = document.createElement("button");
+    b.className = "sigbtn";
+    b.type = "button";
+    b.innerHTML = "<span class='sn'></span><span class='sp'></span>";
+    b.querySelector(".sn").textContent = sig.name || "서명";
+    b.querySelector(".sp").textContent = sig.text.replace(/\s+/g, " ").trim().slice(0, 26);
+    b.addEventListener("click", () => post({ action: "sig", text: sig.text, name: sig.name || "서명" }));
+    row.appendChild(b);
+  });
+  sec.hidden = row.children.length === 0;
+  refreshSel();
 };
 window.resetAndFocus = function () {
   q.value = "";

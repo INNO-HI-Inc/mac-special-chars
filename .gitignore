@@ -1,3 +1,10 @@
 .DS_Store
 치트시트.html
 __pycache__/
+
+# 개인정보 — 커밋 금지 (example만 커밋)
+special_chars_signatures.json
+hammerspoon/special_chars_signatures.json
+special_chars_seals_dir.txt
+seals/
+인감*/

@@ -472,6 +472,39 @@ footer dl { display: grid; grid-template-columns: 110px 1fr; gap: 4px 14px; marg
 footer dt { font-weight: 700; }
 footer dd { margin: 0; }
 
+/* ---------- 내 서명 ---------- */
+#sig-wrap:empty { display: none; }
+#sig-wrap { margin-top: 34px; }
+#sig-sec .sig-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+#sig-sec .sig-head h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; margin: 0; display: flex; align-items: center; gap: 8px; }
+#sig-sec .sig-head .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--accent); flex: none; }
+#sig-sec .sig-head .n { color: var(--sub); font-weight: 600; font-size: 11.5px; background: var(--chip); border-radius: 99px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+.sig-head-btns { margin-left: auto; display: flex; gap: 6px; }
+.sig-head-btns button { font-size: 12.5px; font-weight: 700; border: none; border-radius: 99px; padding: 6px 14px; cursor: pointer; transition: transform 0.1s ease; }
+.sig-head-btns button:active { transform: scale(0.96); }
+#sig-add { color: var(--accent); background: var(--accent-weak); }
+#sig-export { color: var(--sub); background: var(--chip); }
+.sig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 9px; }
+.sig-card { position: relative; background: var(--card); border-radius: 16px; display: flex; align-items: stretch; transition: background 0.12s ease; }
+.sig-card:hover { background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.sig-copy { flex: 1; min-width: 0; text-align: left; background: none; border: none; cursor: pointer; padding: 13px 6px 13px 15px; border-radius: 16px; color: inherit; }
+.sig-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sig-copy .sig-nm { font-size: 13.5px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sig-copy .sig-prev { font-size: 12px; color: var(--sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; word-break: break-word; }
+.sig-tools { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 8px 0 2px; }
+.sig-tools button { border: none; background: none; cursor: pointer; color: var(--sub); font-size: 12px; padding: 5px 7px; border-radius: 8px; }
+.sig-tools button:hover { background: var(--chip); color: var(--ink); }
+.sig-tools button:focus-visible { outline: 2px solid var(--accent); }
+.sig-empty { background: var(--card); border-radius: 16px; padding: 22px; text-align: center; color: var(--sub); font-size: 13px; line-height: 1.7; }
+.sig-field { display: block; font-size: 12.5px; font-weight: 700; color: var(--sub); margin-bottom: 14px; }
+.sig-field input, .sig-field textarea { display: block; width: 100%; margin-top: 7px; font: inherit; font-size: 15px; color: var(--ink); font-weight: 400; background: var(--chip); border: none; border-radius: 12px; padding: 11px 13px; outline: none; resize: vertical; }
+.sig-field textarea { line-height: 1.5; min-height: 90px; }
+.sig-field input:focus, .sig-field textarea:focus { box-shadow: 0 0 0 2px var(--accent) inset; }
+.sig-hint { font-size: 11.5px; color: var(--sub); margin: 0 0 16px; }
+.sig-actions { display: flex; gap: 8px; }
+.sig-actions button { flex: 1; font-size: 14px; font-weight: 700; border: none; border-radius: 12px; padding: 12px; cursor: pointer; background: var(--chip); color: var(--ink); }
+.sig-actions .sig-primary { background: var(--accent); color: var(--on-accent); }
+
 .print-head { display: none; }
 
 /* ---------- 디테일 폴리시 ---------- */
@@ -511,13 +544,13 @@ footer dd { margin: 0; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 header { animation: rise 0.4s ease both; }
 .toolbar { animation: rise 0.4s ease 0.06s both; }
-#pin-wrap, #recent-wrap, #sections { animation: rise 0.45s ease 0.12s both; }
+#sig-wrap, #pin-wrap, #recent-wrap, #sections { animation: rise 0.45s ease 0.12s both; }
 @keyframes pop { from { opacity: 0; transform: scale(0.97); } }
 .item.copied::after { animation: pop 0.16s ease; }
 @keyframes traySlide { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
 #tray.on { animation: traySlide 0.2s ease; }
 @media (prefers-reduced-motion: reduce) {
-  header, .toolbar, #pin-wrap, #recent-wrap, #sections { animation: none; }
+  header, .toolbar, #sig-wrap, #pin-wrap, #recent-wrap, #sections { animation: none; }
   .item.copied::after, #tray.on { animation: none; }
   .item:hover { transform: none; box-shadow: none; }
 }
@@ -544,7 +577,7 @@ header { animation: rise 0.4s ease both; }
     --c-hanja: #000; --c-work: #000; --c-punct: #000; --c-combo: #000;
   }
   .toolbar, .howto, #toast, footer, #recent-sec, #pin-sec, header p.lede,
-  #onboard, #tray, #totop, #menu, .modal, .pin { display: none !important; }
+  #onboard, #tray, #totop, #menu, .modal, .pin, #sig-wrap { display: none !important; }
   body { background: #fff; color: #000; }
   .wrap { padding: 0; max-width: none; }
   .print-head { display: block; font-size: 12px; color: #555; margin-bottom: 10px; }
@@ -609,6 +642,7 @@ header { animation: rise 0.4s ease both; }
     </div>
   </div>
 
+  <div id="sig-wrap"></div>
   <div id="pin-wrap"></div>
   <div id="recent-wrap"></div>
   <div id="sections"></div>
@@ -672,6 +706,23 @@ header { animation: rise 0.4s ease both; }
     <h3>직접 복사 <button class="x" data-close="manual" aria-label="닫기">✕</button></h3>
     <p style="font-size:13px;color:var(--sub);margin:0 0 10px">자동 복사가 막혀 있어요. 아래 내용을 선택하고 ⌘C를 눌러 주세요.</p>
     <input id="manual-text" readonly>
+  </div>
+</div>
+
+<div class="modal" id="sig-edit" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="서명 편집">
+    <h3><span id="sig-edit-title">서명 추가</span> <button class="x" data-close="sig-edit" aria-label="닫기">✕</button></h3>
+    <label class="sig-field">이름
+      <input id="sig-name" type="text" placeholder="예: 이메일 서명, 계좌번호" maxlength="40" autocomplete="off">
+    </label>
+    <label class="sig-field">내용
+      <textarea id="sig-text" rows="5" placeholder="붙여넣을 텍스트를 입력하세요 (여러 줄 가능)"></textarea>
+    </label>
+    <p class="sig-hint">🔒 이 내용은 이 브라우저에만 저장돼요. 서버로 전송되지 않아요.</p>
+    <div class="sig-actions">
+      <button id="sig-save" class="sig-primary">저장</button>
+      <button id="sig-cancel" data-close="sig-edit">취소</button>
+    </div>
   </div>
 </div>
 
@@ -768,7 +819,7 @@ const SERIES = SERIES_DEFS.map(def => {
 }).filter(s => s.members.length > 1);
 
 /* ---------- 저장 상태 ---------- */
-const K = { recent: "sc-recent-v1", pins: "sc-pins-v1", counts: "sc-counts-v1", setup: "sc-setup-v1", rq: "sc-rq-v1", quizBest: "sc-quiz-best-v1", sess: "sc-sess-v1" };
+const K = { recent: "sc-recent-v1", pins: "sc-pins-v1", counts: "sc-counts-v1", setup: "sc-setup-v1", rq: "sc-rq-v1", quizBest: "sc-quiz-best-v1", sess: "sc-sess-v1", sigs: "sc-sigs-v1" };
 let pins = stGet(K.pins, "l", []).filter(k => byShortcut[k]);
 let counts = stGet(K.counts, "l", {});
 function getRecent() { return stGet(K.recent, "l", []).filter(k => byShortcut[k]); }
@@ -1120,6 +1171,119 @@ function renderRecent() {
 }
 renderPinned();
 renderRecent();
+
+/* ---------- 내 서명 (localStorage, 이 브라우저에만 저장) ---------- */
+function getSigs() { return stGet(K.sigs, "l", []).filter(s => s && typeof s.text === "string" && s.text); }
+function setSigs(list) { stSet(K.sigs, list, "l"); renderSigs(); }
+let sigEditIndex = null;
+function openSigEdit(index) {
+  sigEditIndex = index;
+  const sig = index === null ? { name: "", text: "" } : (getSigs()[index] || { name: "", text: "" });
+  document.getElementById("sig-edit-title").textContent = index === null ? "서명 추가" : "서명 편집";
+  document.getElementById("sig-name").value = sig.name || "";
+  document.getElementById("sig-text").value = sig.text || "";
+  openModal("sig-edit");
+  const nm = document.getElementById("sig-name");
+  nm.focus();
+  nm.select();
+}
+function saveSigEdit() {
+  const name = document.getElementById("sig-name").value.trim();
+  const text = document.getElementById("sig-text").value;
+  if (!text.trim()) { toast("내용을 입력해 주세요", "", true); document.getElementById("sig-text").focus(); return; }
+  const list = getSigs();
+  const item = { name: name || "서명", text: text };
+  if (sigEditIndex === null || sigEditIndex >= list.length) list.push(item);
+  else list[sigEditIndex] = item;
+  setSigs(list);
+  closeModal(document.getElementById("sig-edit"));
+  toast("서명을 저장했어요", "카드를 누르면 복사돼요");
+}
+function exportSigsFile() {
+  const sigs = getSigs().map(s => ({ name: s.name || "서명", text: s.text }));
+  if (!sigs.length) { toast("내보낼 서명이 없어요", "", true); return; }
+  const json = JSON.stringify(sigs, null, 2);
+  try {
+    const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = "special_chars_signatures.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    toast("파일을 저장했어요", "~/.hammerspoon 폴더에 넣으면 ⌥Space 팔레트에 나와요");
+  } catch (e) { copyText(json, "서명 JSON"); }
+}
+function renderSigs() {
+  const wrap = document.getElementById("sig-wrap");
+  const sigs = getSigs();
+  const sec = document.createElement("section");
+  sec.id = "sig-sec";
+  const head = document.createElement("div");
+  head.className = "sig-head";
+  head.innerHTML = "<h2><span class='dot'></span>내 서명 <span class='n'>" + sigs.length + "</span></h2>";
+  const btns = document.createElement("div");
+  btns.className = "sig-head-btns";
+  if (sigs.length) {
+    const ex = document.createElement("button");
+    ex.id = "sig-export"; ex.type = "button";
+    ex.textContent = "팔레트로 내보내기";
+    ex.title = "⌥Space 팔레트에서 쓸 파일(special_chars_signatures.json)로 저장";
+    ex.addEventListener("click", exportSigsFile);
+    btns.appendChild(ex);
+  }
+  const add = document.createElement("button");
+  add.id = "sig-add"; add.type = "button";
+  add.textContent = "+ 서명 추가";
+  add.addEventListener("click", () => openSigEdit(null));
+  btns.appendChild(add);
+  head.appendChild(btns);
+  sec.appendChild(head);
+
+  if (!sigs.length) {
+    const empty = document.createElement("div");
+    empty.className = "sig-empty";
+    empty.innerHTML = "이메일 서명, 계좌번호, 자주 쓰는 문구를 저장해두고 한 번에 복사하세요.<br>🔒 이 브라우저에만 저장돼요.";
+    sec.appendChild(empty);
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "sig-grid";
+    sigs.forEach((sig, i) => {
+      const card = document.createElement("div");
+      card.className = "sig-card";
+      const copy = document.createElement("button");
+      copy.className = "sig-copy"; copy.type = "button";
+      copy.setAttribute("aria-label", (sig.name || "서명") + " 복사");
+      const nm = document.createElement("div"); nm.className = "sig-nm"; nm.textContent = sig.name || "서명";
+      const pv = document.createElement("div"); pv.className = "sig-prev"; pv.textContent = sig.text;
+      copy.appendChild(nm); copy.appendChild(pv);
+      copy.addEventListener("click", () => copyText(sig.text, sig.name || "서명"));
+      const tools = document.createElement("div");
+      tools.className = "sig-tools";
+      const edit = document.createElement("button");
+      edit.type = "button"; edit.textContent = "편집";
+      edit.setAttribute("aria-label", (sig.name || "서명") + " 편집");
+      edit.addEventListener("click", () => openSigEdit(i));
+      const del = document.createElement("button");
+      del.type = "button"; del.textContent = "삭제";
+      del.setAttribute("aria-label", (sig.name || "서명") + " 삭제");
+      del.addEventListener("click", () => {
+        const list = getSigs(); list.splice(i, 1); setSigs(list);
+        toast("서명을 삭제했어요", "");
+      });
+      tools.appendChild(edit); tools.appendChild(del);
+      card.appendChild(copy); card.appendChild(tools);
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+  }
+  wrap.innerHTML = "";
+  wrap.appendChild(sec);
+}
+document.getElementById("sig-save").addEventListener("click", saveSigEdit);
+["sig-name", "sig-text"].forEach(id => document.getElementById(id).addEventListener("keydown", ev => {
+  if (ev.isComposing || ev.keyCode === 229) return;
+  if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); saveSigEdit(); }
+}));
+renderSigs();
 
 /* ---------- 검색 · 필터 ---------- */
 const qInput = document.getElementById("q");
