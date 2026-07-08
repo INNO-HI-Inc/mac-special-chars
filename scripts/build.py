@@ -177,6 +177,11 @@ button.g.sel { background: var(--chip); }
     <span class="hint">←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · Esc 닫기</span>
     <button id="x" title="닫기 (Esc)">✕</button>
   </div>
+  <div class="sec" id="recent-sec" hidden>
+    <div class="lbl"><span class="dot" style="background:var(--sub)"></span>최근</div>
+    <div class="row" id="recent-row"></div>
+  </div>
+  @@SECTIONS@@
   <div class="sec" id="seal-sec" hidden>
     <div class="lbl"><span class="dot" style="background:var(--c1)"></span>인감 · 도장</div>
     <div class="sealrow" id="seal-row"></div>
@@ -185,11 +190,6 @@ button.g.sel { background: var(--chip); }
     <div class="lbl"><span class="dot" style="background:var(--accent)"></span>내 서명</div>
     <div class="sigrow" id="sig-row"></div>
   </div>
-  <div class="sec" id="recent-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--sub)"></span>최근</div>
-    <div class="row" id="recent-row"></div>
-  </div>
-  @@SECTIONS@@
   <div class="status" id="status">기호를 누르면 커서 위치에 바로 입력돼요 · ⌘클릭은 복사만 해요</div>
 </div>
 <script>
