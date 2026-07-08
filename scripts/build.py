@@ -140,32 +140,6 @@ button.g.long { font-size: 12px; letter-spacing: 1px; padding: 0 10px; grid-colu
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .status b { color: var(--ink); }
-.sigrow { display: flex; flex-wrap: wrap; gap: 6px; }
-.sigbtn {
-  display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
-  padding: 8px 13px; border: none; cursor: pointer; text-align: left;
-  background: color-mix(in srgb, var(--accent) 10%, var(--card));
-  color: var(--ink); border-radius: 10px; font-size: 13px;
-  transition: transform 0.1s ease, background 0.1s ease;
-}
-.sigbtn:hover { background: var(--chip); }
-.sigbtn:active { transform: scale(0.96); }
-.sigbtn .sn { font-weight: 700; white-space: nowrap; }
-.sigbtn .sp {
-  color: var(--sub); font-weight: 400; font-size: 11.5px;
-  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.sealrow { display: flex; flex-wrap: wrap; gap: 8px; }
-.sealbtn {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  width: 82px; padding: 8px 6px; border: none; cursor: pointer;
-  background: var(--card); border-radius: 12px; color: var(--ink);
-  transition: transform 0.1s ease, background 0.1s ease;
-}
-.sealbtn:hover { background: var(--chip); }
-.sealbtn:active { transform: scale(0.95); }
-.sealbtn img { width: 58px; height: 58px; object-fit: contain; background: #fff; border-radius: 8px; }
-.sealbtn .seal-nm { font-size: 10.5px; color: var(--sub); max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 2; }
 button.g.sel { background: var(--chip); }
 </style></head>
@@ -182,14 +156,6 @@ button.g.sel { background: var(--chip); }
     <div class="row" id="recent-row"></div>
   </div>
   @@SECTIONS@@
-  <div class="sec" id="seal-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--c1)"></span>인감 · 도장</div>
-    <div class="sealrow" id="seal-row"></div>
-  </div>
-  <div class="sec" id="sig-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--accent)"></span>내 서명</div>
-    <div class="sigrow" id="sig-row"></div>
-  </div>
   <div class="status" id="status">기호를 누르면 커서 위치에 바로 입력돼요 · ⌘클릭은 복사만 해요</div>
 </div>
 <script>
@@ -223,7 +189,6 @@ function filter() {
   });
   document.querySelectorAll(".sec").forEach(sec => {
     if (sec.id === "recent-sec" && sec.hidden) return;
-    if (sec.id === "seal-sec" || sec.id === "sig-sec") { if (!sec.hidden) sec.style.display = raw ? "none" : ""; return; }
     const any = [...sec.querySelectorAll("button.g")].some(b => b.style.display !== "none");
     sec.style.display = any ? "" : "none";
   });
@@ -233,7 +198,7 @@ q.addEventListener("input", filter);
 // ---- 키보드 커서: 파란 테두리로 현재 위치, 방향키 이동, Enter 입력 ----
 let sel = null;
 function focusables() {
-  return [...document.querySelectorAll(".sec:not([hidden]) .sealbtn, .sec:not([hidden]) .sigbtn, .sec:not([hidden]) button.g")]
+  return [...document.querySelectorAll(".sec:not([hidden]) button.g")]
     .filter(el => el.offsetParent !== null && el.style.display !== "none");
 }
 function setSel(el) {
@@ -297,42 +262,6 @@ window.setRecent = function (chars) {
   sec.hidden = row.children.length === 0;
   refreshSel();
 };
-window.setSeals = function (list) {
-  const sec = document.getElementById("seal-sec");
-  const row = document.getElementById("seal-row");
-  row.innerHTML = "";
-  (Array.isArray(list) ? list : []).forEach(s => {
-    if (!s || !s.id) return;
-    const b = document.createElement("button");
-    b.className = "sealbtn"; b.type = "button";
-    b.title = (s.name || "인감") + " 이미지 복사";
-    if (s.img) { const im = document.createElement("img"); im.src = s.img; im.alt = s.name || "인감"; b.appendChild(im); }
-    const nm = document.createElement("div"); nm.className = "seal-nm"; nm.textContent = s.name || "인감";
-    b.appendChild(nm);
-    b.addEventListener("click", () => post({ action: "seal", id: s.id, name: s.name || "인감" }));
-    row.appendChild(b);
-  });
-  sec.hidden = row.children.length === 0;
-  refreshSel();
-};
-window.setSignatures = function (sigs) {
-  const sec = document.getElementById("sig-sec");
-  const row = document.getElementById("sig-row");
-  row.innerHTML = "";
-  (Array.isArray(sigs) ? sigs : []).forEach(sig => {
-    if (!sig || typeof sig.text !== "string" || !sig.text) return;
-    const b = document.createElement("button");
-    b.className = "sigbtn";
-    b.type = "button";
-    b.innerHTML = "<span class='sn'></span><span class='sp'></span>";
-    b.querySelector(".sn").textContent = sig.name || "서명";
-    b.querySelector(".sp").textContent = sig.text.replace(/\\s+/g, " ").trim().slice(0, 26);
-    b.addEventListener("click", () => post({ action: "sig", text: sig.text, name: sig.name || "서명" }));
-    row.appendChild(b);
-  });
-  sec.hidden = row.children.length === 0;
-  refreshSel();
-};
 window.resetAndFocus = function () {
   q.value = "";
   filter();
@@ -345,7 +274,7 @@ PALETTE.write_text(palette_html.replace("@@SECTIONS@@", SECTIONS), encoding="utf
 
 # --- 3b. Hammerspoon Lua (v4: webview 버튼 그리드) ---
 lua_template = r"""-- ============================================================
--- 특수문자 팔레트 v6  (⌥ + Space) — 기호·인감이미지·내 서명 클립보드 + 키보드 커서
+-- 특수문자 팔레트 v5  (⌥ + Space) — 버튼 그리드 + 키보드 커서
 -- 99개 기호가 한 화면에 버튼으로 깔림. 클릭 = 커서 위치에 입력 + 복사
 --   ⌘클릭(또는 검색 후 ⌘Enter) = 복사만
 --   검색: 이름 · 단축어 · 초성(ㅂㅈ→별점) / Esc = 닫기
@@ -355,55 +284,6 @@ lua_template = r"""-- ==========================================================
 
 local CHAR_COUNT = @@COUNT@@
 local PALETTE_FILE = hs.configdir .. "/special_chars_palette.html"
--- 내 서명: 개인정보이므로 이 파일에만 저장(레포에 커밋 안 됨). JSON 배열 [{name, text}, ...]
-local SIG_FILE = hs.configdir .. "/special_chars_signatures.json"
-local function loadSignatures()
-  local ok, data = pcall(hs.json.read, SIG_FILE)
-  if ok and type(data) == "table" then return data end
-  return {}
-end
-
--- 인감/도장 이미지: 로컬 폴더에서만 읽음(레포에 커밋 안 됨). 클릭 시 이미지가 클립보드로.
-local SEAL_DIR = hs.configdir .. "/seals"
-if not hs.fs.attributes(SEAL_DIR) then
-  local alt = os.getenv("HOME") .. "/Desktop/인감 모음"
-  if hs.fs.attributes(alt) then SEAL_DIR = alt end
-end
-do
-  local cfg = io.open(hs.configdir .. "/special_chars_seals_dir.txt", "r")
-  if cfg then local p = cfg:read("*l"); cfg:close(); if p and #p > 0 then SEAL_DIR = p end end
-end
-local sealPaths = {}
-local function loadSeals()
-  sealPaths = {}
-  local list = {}
-  local function scan(dir, cat)
-    if not hs.fs.attributes(dir) then return end
-    local ok = pcall(function()
-      for name in hs.fs.dir(dir) do
-        if name:sub(1, 1) ~= "." then
-          local full = dir .. "/" .. name
-          local attr = hs.fs.attributes(full)
-          if attr and attr.mode == "directory" then
-            scan(full, name)
-          elseif name:lower():match("%.png$") or name:lower():match("%.jpe?g$") then
-            local img = hs.image.imageFromPath(full)
-            if img then
-              local id = tostring(#list + 1)
-              sealPaths[id] = full
-              local uri = ""
-              pcall(function() img:setSize({ w = 128, h = 128 }); uri = img:encodeAsURLString() end)
-              list[#list + 1] = { id = id, name = (name:gsub("%.%w+$", "")), cat = cat or "", img = uri }
-            end
-          end
-        end
-      end
-    end)
-    if not ok then return end
-  end
-  scan(SEAL_DIR, nil)
-  return list
-end
 
 local RECENT_KEY = "specialchars.recent"
 local COUNT_KEY = "specialchars.counts"
@@ -464,20 +344,6 @@ uc:setCallback(function(msg)
     hs.timer.doAfter(0.15, function()
       hs.eventtap.keyStrokes(b.char)
     end)
-  elseif b.action == "sig" and type(b.text) == "string" and #b.text > 0 then
-    hs.pasteboard.setContents(b.text)
-    hidePalette(true)
-    hs.alert.show((b.name or "서명") .. "  복사됨 · ⌘V로 붙여넣기", 0.9)
-  elseif b.action == "seal" and type(b.id) == "string" then
-    local path = sealPaths[b.id]
-    if path then
-      local img = hs.image.imageFromPath(path)
-      if img then
-        hs.pasteboard.writeObjects(img)
-        hidePalette(true)
-        hs.alert.show((b.name or "인감") .. " 이미지 복사됨 · ⌘V로 붙여넣기", 0.9)
-      end
-    end
   elseif b.action == "close" then
     hidePalette(true)
   end
@@ -500,8 +366,6 @@ local function showPalette()
   wv:frame(paletteRect())
   local rec = hs.settings.get(RECENT_KEY) or {}
   wv:evaluateJavaScript("window.setRecent && setRecent(" .. hs.json.encode(rec) .. ")")
-  wv:evaluateJavaScript("window.setSignatures && setSignatures(" .. hs.json.encode(loadSignatures()) .. ")")
-  wv:evaluateJavaScript("window.setSeals && setSeals(" .. hs.json.encode(loadSeals()) .. ")")
   wv:show()
   shown = true
   hs.timer.doAfter(0.08, function()
@@ -519,22 +383,12 @@ end)
 --   hs -c "SpecialChars.probe()" && sleep 1 && hs -c "print(hs.settings.get('specialchars.probe'))"
 SpecialChars = {
   count = CHAR_COUNT,
-  version = 6,
+  version = 5,
   show = showPalette,
   hide = function() hidePalette(true) end,
   probe = function()
     wv:evaluateJavaScript("document.querySelectorAll('button.g').length", function(res)
       hs.settings.set("specialchars.probe", res)
-    end)
-  end,
-  probeSig = function()
-    wv:evaluateJavaScript("document.querySelectorAll('.sigbtn').length", function(res)
-      hs.settings.set("specialchars.sigprobe", res)
-    end)
-  end,
-  probeSeal = function()
-    wv:evaluateJavaScript("document.querySelectorAll('.sealbtn').length", function(res)
-      hs.settings.set("specialchars.sealprobe", res)
     end)
   end,
 }

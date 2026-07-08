@@ -69,32 +69,6 @@ button.g.long { font-size: 12px; letter-spacing: 1px; padding: 0 10px; grid-colu
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .status b { color: var(--ink); }
-.sigrow { display: flex; flex-wrap: wrap; gap: 6px; }
-.sigbtn {
-  display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
-  padding: 8px 13px; border: none; cursor: pointer; text-align: left;
-  background: color-mix(in srgb, var(--accent) 10%, var(--card));
-  color: var(--ink); border-radius: 10px; font-size: 13px;
-  transition: transform 0.1s ease, background 0.1s ease;
-}
-.sigbtn:hover { background: var(--chip); }
-.sigbtn:active { transform: scale(0.96); }
-.sigbtn .sn { font-weight: 700; white-space: nowrap; }
-.sigbtn .sp {
-  color: var(--sub); font-weight: 400; font-size: 11.5px;
-  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.sealrow { display: flex; flex-wrap: wrap; gap: 8px; }
-.sealbtn {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  width: 82px; padding: 8px 6px; border: none; cursor: pointer;
-  background: var(--card); border-radius: 12px; color: var(--ink);
-  transition: transform 0.1s ease, background 0.1s ease;
-}
-.sealbtn:hover { background: var(--chip); }
-.sealbtn:active { transform: scale(0.95); }
-.sealbtn img { width: 58px; height: 58px; object-fit: contain; background: #fff; border-radius: 8px; }
-.sealbtn .seal-nm { font-size: 10.5px; color: var(--sub); max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 2; }
 button.g.sel { background: var(--chip); }
 </style></head>
@@ -111,14 +85,6 @@ button.g.sel { background: var(--chip); }
     <div class="row" id="recent-row"></div>
   </div>
   <div class="sec"><div class="lbl"><span class="dot" style="background:var(--c1)"></span>한자키 클래식</div><div class="row"><button class="g" data-c="※" data-n="당구장 표시(참고표)" data-s="ㅁ참고" data-cho="ㄷㄱㅈ ㅍㅅ(ㅊㄱㅍ)" title="당구장 표시(참고표) · ㅁ참고 + 스페이스">※</button><button class="g" data-c="★" data-n="검은 별표" data-s="ㅁ별" data-cho="ㄱㅇ ㅂㅍ" title="검은 별표 · ㅁ별 + 스페이스">★</button><button class="g" data-c="☆" data-n="빈 별표" data-s="ㅁ빈별" data-cho="ㅂ ㅂㅍ" title="빈 별표 · ㅁ빈별 + 스페이스">☆</button><button class="g" data-c="♥" data-n="검은 하트" data-s="ㅁ하트" data-cho="ㄱㅇ ㅎㅌ" title="검은 하트 · ㅁ하트 + 스페이스">♥</button><button class="g" data-c="♡" data-n="빈 하트" data-s="ㅁ빈하트" data-cho="ㅂ ㅎㅌ" title="빈 하트 · ㅁ빈하트 + 스페이스">♡</button><button class="g" data-c="✓" data-n="체크 표시" data-s="ㅁ체크" data-cho="ㅊㅋ ㅍㅅ" title="체크 표시 · ㅁ체크 + 스페이스">✓</button><button class="g" data-c="→" data-n="오른쪽 화살표" data-s="ㅁ오른" data-cho="ㅇㄹㅉ ㅎㅅㅍ" title="오른쪽 화살표 · ㅁ오른 + 스페이스">→</button><button class="g" data-c="●" data-n="검은 동그라미" data-s="ㅁ원" data-cho="ㄱㅇ ㄷㄱㄹㅁ" title="검은 동그라미 · ㅁ원 + 스페이스">●</button><button class="g" data-c="○" data-n="빈 동그라미" data-s="ㅁ빈원" data-cho="ㅂ ㄷㄱㄹㅁ" title="빈 동그라미 · ㅁ빈원 + 스페이스">○</button><button class="g" data-c="←" data-n="왼쪽 화살표" data-s="ㅁ왼" data-cho="ㅇㅉ ㅎㅅㅍ" title="왼쪽 화살표 · ㅁ왼 + 스페이스">←</button><button class="g" data-c="↑" data-n="위쪽 화살표" data-s="ㅁ위" data-cho="ㅇㅉ ㅎㅅㅍ" title="위쪽 화살표 · ㅁ위 + 스페이스">↑</button><button class="g" data-c="↓" data-n="아래쪽 화살표" data-s="ㅁ아래" data-cho="ㅇㄹㅉ ㅎㅅㅍ" title="아래쪽 화살표 · ㅁ아래 + 스페이스">↓</button><button class="g" data-c="↔" data-n="양쪽 화살표" data-s="ㅁ양쪽" data-cho="ㅇㅉ ㅎㅅㅍ" title="양쪽 화살표 · ㅁ양쪽 + 스페이스">↔</button><button class="g" data-c="⇒" data-n="이중 화살표" data-s="ㅁ겹우" data-cho="ㅇㅈ ㅎㅅㅍ" title="이중 화살표 · ㅁ겹우 + 스페이스">⇒</button><button class="g" data-c="■" data-n="검은 네모" data-s="ㅁ네모" data-cho="ㄱㅇ ㄴㅁ" title="검은 네모 · ㅁ네모 + 스페이스">■</button><button class="g" data-c="□" data-n="빈 네모" data-s="ㅁ빈네모" data-cho="ㅂ ㄴㅁ" title="빈 네모 · ㅁ빈네모 + 스페이스">□</button><button class="g" data-c="◎" data-n="겹 동그라미" data-s="ㅁ겹원" data-cho="ㄱ ㄷㄱㄹㅁ" title="겹 동그라미 · ㅁ겹원 + 스페이스">◎</button><button class="g" data-c="▲" data-n="검은 세모" data-s="ㅁ세모" data-cho="ㄱㅇ ㅅㅁ" title="검은 세모 · ㅁ세모 + 스페이스">▲</button><button class="g" data-c="△" data-n="빈 세모" data-s="ㅁ빈세모" data-cho="ㅂ ㅅㅁ" title="빈 세모 · ㅁ빈세모 + 스페이스">△</button><button class="g" data-c="▼" data-n="검은 역세모" data-s="ㅁ역세모" data-cho="ㄱㅇ ㅇㅅㅁ" title="검은 역세모 · ㅁ역세모 + 스페이스">▼</button><button class="g" data-c="◆" data-n="검은 마름모" data-s="ㅁ마름모" data-cho="ㄱㅇ ㅁㄹㅁ" title="검은 마름모 · ㅁ마름모 + 스페이스">◆</button><button class="g" data-c="◇" data-n="빈 마름모" data-s="ㅁ빈마름모" data-cho="ㅂ ㅁㄹㅁ" title="빈 마름모 · ㅁ빈마름모 + 스페이스">◇</button><button class="g" data-c="▶" data-n="오른쪽 검은 삼각형" data-s="ㅁ우삼각" data-cho="ㅇㄹㅉ ㄱㅇ ㅅㄱㅎ" title="오른쪽 검은 삼각형 · ㅁ우삼각 + 스페이스">▶</button><button class="g" data-c="☞" data-n="오른쪽 손가락" data-s="ㅁ우손" data-cho="ㅇㄹㅉ ㅅㄱㄹ" title="오른쪽 손가락 · ㅁ우손 + 스페이스">☞</button><button class="g" data-c="☎" data-n="전화기 기호" data-s="ㅁ전화" data-cho="ㅈㅎㄱ ㄱㅎ" title="전화기 기호 · ㅁ전화 + 스페이스">☎</button><button class="g" data-c="♪" data-n="음표(8분음표)" data-s="ㅁ음표" data-cho="ㅇㅍ(8ㅂㅇㅍ)" title="음표(8분음표) · ㅁ음표 + 스페이스">♪</button><button class="g" data-c="♬" data-n="겹음표" data-s="ㅁ겹음표" data-cho="ㄱㅇㅍ" title="겹음표 · ㅁ겹음표 + 스페이스">♬</button><button class="g" data-c="▽" data-n="빈 역세모" data-s="ㅁ빈역세모" data-cho="ㅂ ㅇㅅㅁ" title="빈 역세모 · ㅁ빈역세모 + 스페이스">▽</button><button class="g" data-c="↗" data-n="우상향 화살표" data-s="ㅁ우상" data-cho="ㅇㅅㅎ ㅎㅅㅍ" title="우상향 화살표 · ㅁ우상 + 스페이스">↗</button><button class="g" data-c="↘" data-n="우하향 화살표" data-s="ㅁ우하" data-cho="ㅇㅎㅎ ㅎㅅㅍ" title="우하향 화살표 · ㅁ우하 + 스페이스">↘</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c2)"></span>업무 · 단위 · 번호</div><div class="row"><button class="g" data-c="℃" data-n="섭씨" data-s="ㅁ섭씨" data-cho="ㅅㅆ" title="섭씨 · ㅁ섭씨 + 스페이스">℃</button><button class="g" data-c="×" data-n="곱하기표" data-s="ㅁ곱" data-cho="ㄱㅎㄱㅍ" title="곱하기표 · ㅁ곱 + 스페이스">×</button><button class="g" data-c="①" data-n="원문자 1" data-s="ㅁ1" data-cho="ㅇㅁㅈ 1" title="원문자 1 · ㅁ1 + 스페이스">①</button><button class="g" data-c="②" data-n="원문자 2" data-s="ㅁ2" data-cho="ㅇㅁㅈ 2" title="원문자 2 · ㅁ2 + 스페이스">②</button><button class="g" data-c="③" data-n="원문자 3" data-s="ㅁ3" data-cho="ㅇㅁㅈ 3" title="원문자 3 · ㅁ3 + 스페이스">③</button><button class="g" data-c="④" data-n="원문자 4" data-s="ㅁ4" data-cho="ㅇㅁㅈ 4" title="원문자 4 · ㅁ4 + 스페이스">④</button><button class="g" data-c="⑤" data-n="원문자 5" data-s="ㅁ5" data-cho="ㅇㅁㅈ 5" title="원문자 5 · ㅁ5 + 스페이스">⑤</button><button class="g" data-c="㈜" data-n="주식회사 기호" data-s="ㅁ주식" data-cho="ㅈㅅㅎㅅ ㄱㅎ" title="주식회사 기호 · ㅁ주식 + 스페이스">㈜</button><button class="g" data-c="㎡" data-n="제곱미터" data-s="ㅁ제곱미터" data-cho="ㅈㄱㅁㅌ" title="제곱미터 · ㅁ제곱미터 + 스페이스">㎡</button><button class="g" data-c="°" data-n="도(각도)" data-s="ㅁ각도" data-cho="ㄷ(ㄱㄷ)" title="도(각도) · ㅁ각도 + 스페이스">°</button><button class="g" data-c="©" data-n="저작권 기호" data-s="ㅁ저작권" data-cho="ㅈㅈㄱ ㄱㅎ" title="저작권 기호 · ㅁ저작권 + 스페이스">©</button><button class="g" data-c="±" data-n="플러스마이너스" data-s="ㅁ플마" data-cho="ㅍㄹㅅㅁㅇㄴㅅ" title="플러스마이너스 · ㅁ플마 + 스페이스">±</button><button class="g" data-c="÷" data-n="나누기표" data-s="ㅁ나누기" data-cho="ㄴㄴㄱㅍ" title="나누기표 · ㅁ나누기 + 스페이스">÷</button><button class="g" data-c="≒" data-n="약(근사)기호" data-s="ㅁ약" data-cho="ㅇ(ㄱㅅ)ㄱㅎ" title="약(근사)기호 · ㅁ약 + 스페이스">≒</button><button class="g" data-c="≠" data-n="같지않음" data-s="ㅁ다름" data-cho="ㄱㅈㅇㅇ" title="같지않음 · ㅁ다름 + 스페이스">≠</button><button class="g" data-c="≥" data-n="크거나같음" data-s="ㅁ이상" data-cho="ㅋㄱㄴㄱㅇ" title="크거나같음 · ㅁ이상 + 스페이스">≥</button><button class="g" data-c="≤" data-n="작거나같음" data-s="ㅁ이하" data-cho="ㅈㄱㄴㄱㅇ" title="작거나같음 · ㅁ이하 + 스페이스">≤</button><button class="g" data-c="²" data-n="위첨자 2" data-s="ㅁ제곱" data-cho="ㅇㅊㅈ 2" title="위첨자 2 · ㅁ제곱 + 스페이스">²</button><button class="g" data-c="³" data-n="위첨자 3" data-s="ㅁ세제곱" data-cho="ㅇㅊㅈ 3" title="위첨자 3 · ㅁ세제곱 + 스페이스">³</button><button class="g" data-c="㎏" data-n="킬로그램(합자)" data-s="ㅁ킬로그램" data-cho="ㅋㄹㄱㄹ(ㅎㅈ)" title="킬로그램(합자) · ㅁ킬로그램 + 스페이스">㎏</button><button class="g" data-c="㎜" data-n="밀리미터(합자)" data-s="ㅁ밀리미터" data-cho="ㅁㄹㅁㅌ(ㅎㅈ)" title="밀리미터(합자) · ㅁ밀리미터 + 스페이스">㎜</button><button class="g" data-c="㎝" data-n="센티미터(합자)" data-s="ㅁ센티" data-cho="ㅅㅌㅁㅌ(ㅎㅈ)" title="센티미터(합자) · ㅁ센티 + 스페이스">㎝</button><button class="g" data-c="㎞" data-n="킬로미터(합자)" data-s="ㅁ킬로미터" data-cho="ㅋㄹㅁㅌ(ㅎㅈ)" title="킬로미터(합자) · ㅁ킬로미터 + 스페이스">㎞</button><button class="g" data-c="ℓ" data-n="리터" data-s="ㅁ리터" data-cho="ㄹㅌ" title="리터 · ㅁ리터 + 스페이스">ℓ</button><button class="g" data-c="㎖" data-n="밀리리터(합자)" data-s="ㅁ밀리리터" data-cho="ㅁㄹㄹㅌ(ㅎㅈ)" title="밀리리터(합자) · ㅁ밀리리터 + 스페이스">㎖</button><button class="g" data-c="㎥" data-n="세제곱미터" data-s="ㅁ세제곱미터" data-cho="ㅅㅈㄱㅁㅌ" title="세제곱미터 · ㅁ세제곱미터 + 스페이스">㎥</button><button class="g" data-c="㎥" data-n="세제곱미터(루베)" data-s="ㅁ루베" data-cho="ㅅㅈㄱㅁㅌ(ㄹㅂ)" title="세제곱미터(루베) · ㅁ루베 + 스페이스">㎥</button><button class="g" data-c="€" data-n="유로" data-s="ㅁ유로" data-cho="ㅇㄹ" title="유로 · ㅁ유로 + 스페이스">€</button><button class="g" data-c="⑥" data-n="원문자 6" data-s="ㅁ6" data-cho="ㅇㅁㅈ 6" title="원문자 6 · ㅁ6 + 스페이스">⑥</button><button class="g" data-c="⑦" data-n="원문자 7" data-s="ㅁ7" data-cho="ㅇㅁㅈ 7" title="원문자 7 · ㅁ7 + 스페이스">⑦</button><button class="g" data-c="⑧" data-n="원문자 8" data-s="ㅁ8" data-cho="ㅇㅁㅈ 8" title="원문자 8 · ㅁ8 + 스페이스">⑧</button><button class="g" data-c="⑨" data-n="원문자 9" data-s="ㅁ9" data-cho="ㅇㅁㅈ 9" title="원문자 9 · ㅁ9 + 스페이스">⑨</button><button class="g" data-c="⑩" data-n="원문자 10" data-s="ㅁ10" data-cho="ㅇㅁㅈ 10" title="원문자 10 · ㅁ10 + 스페이스">⑩</button><button class="g" data-c="㉠" data-n="한글 원문자 ㄱ" data-s="ㅁ원ㄱ" data-cho="ㅎㄱ ㅇㅁㅈ ㄱ" title="한글 원문자 ㄱ · ㅁ원ㄱ + 스페이스">㉠</button><button class="g" data-c="㉡" data-n="한글 원문자 ㄴ" data-s="ㅁ원ㄴ" data-cho="ㅎㄱ ㅇㅁㅈ ㄴ" title="한글 원문자 ㄴ · ㅁ원ㄴ + 스페이스">㉡</button><button class="g" data-c="㉢" data-n="한글 원문자 ㄷ" data-s="ㅁ원ㄷ" data-cho="ㅎㄱ ㅇㅁㅈ ㄷ" title="한글 원문자 ㄷ · ㅁ원ㄷ + 스페이스">㉢</button><button class="g" data-c="㉣" data-n="한글 원문자 ㄹ" data-s="ㅁ원ㄹ" data-cho="ㅎㄱ ㅇㅁㅈ ㄹ" title="한글 원문자 ㄹ · ㅁ원ㄹ + 스페이스">㉣</button><button class="g" data-c="㉤" data-n="한글 원문자 ㅁ" data-s="ㅁ원ㅁ" data-cho="ㅎㄱ ㅇㅁㅈ ㅁ" title="한글 원문자 ㅁ · ㅁ원ㅁ + 스페이스">㉤</button><button class="g" data-c="Ⅰ" data-n="로마숫자 1" data-s="ㅁ로마1" data-cho="ㄹㅁㅅㅈ 1" title="로마숫자 1 · ㅁ로마1 + 스페이스">Ⅰ</button><button class="g" data-c="Ⅱ" data-n="로마숫자 2" data-s="ㅁ로마2" data-cho="ㄹㅁㅅㅈ 2" title="로마숫자 2 · ㅁ로마2 + 스페이스">Ⅱ</button><button class="g" data-c="Ⅲ" data-n="로마숫자 3" data-s="ㅁ로마3" data-cho="ㄹㅁㅅㅈ 3" title="로마숫자 3 · ㅁ로마3 + 스페이스">Ⅲ</button><button class="g" data-c="Ⅳ" data-n="로마숫자 4" data-s="ㅁ로마4" data-cho="ㄹㅁㅅㅈ 4" title="로마숫자 4 · ㅁ로마4 + 스페이스">Ⅳ</button><button class="g" data-c="Ⅴ" data-n="로마숫자 5" data-s="ㅁ로마5" data-cho="ㄹㅁㅅㅈ 5" title="로마숫자 5 · ㅁ로마5 + 스페이스">Ⅴ</button><button class="g" data-c="™" data-n="상표 기호" data-s="ㅁ상표" data-cho="ㅅㅍ ㄱㅎ" title="상표 기호 · ㅁ상표 + 스페이스">™</button><button class="g" data-c="®" data-n="등록상표 기호" data-s="ㅁ등록상표" data-cho="ㄷㄹㅅㅍ ㄱㅎ" title="등록상표 기호 · ㅁ등록상표 + 스페이스">®</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c3)"></span>괄호 · 문장부호 · 맥 키</div><div class="row"><button class="g" data-c="「」" data-n="홑낫표" data-s="ㅁ낫표" data-cho="ㅎㄴㅍ" title="홑낫표 · ㅁ낫표 + 스페이스">「」</button><button class="g" data-c="·" data-n="가운뎃점" data-s="ㅁ점" data-cho="ㄱㅇㄷㅈ" title="가운뎃점 · ㅁ점 + 스페이스">·</button><button class="g" data-c="…" data-n="말줄임표" data-s="ㅁ줄임" data-cho="ㅁㅈㅇㅍ" title="말줄임표 · ㅁ줄임 + 스페이스">…</button><button class="g" data-c="⌘" data-n="커맨드 키" data-s="ㅁ커맨드" data-cho="ㅋㅁㄷ ㅋ" title="커맨드 키 · ㅁ커맨드 + 스페이스">⌘</button><button class="g" data-c="•" data-n="불릿(글머리점)" data-s="ㅁ불릿" data-cho="ㅂㄹ(ㄱㅁㄹㅈ)" title="불릿(글머리점) · ㅁ불릿 + 스페이스">•</button><button class="g" data-c="『』" data-n="겹낫표" data-s="ㅁ겹낫표" data-cho="ㄱㄴㅍ" title="겹낫표 · ㅁ겹낫표 + 스페이스">『』</button><button class="g" data-c="【】" data-n="검은괄호(실괄호)" data-s="ㅁ검은괄호" data-cho="ㄱㅇㄱㅎ(ㅅㄱㅎ)" title="검은괄호(실괄호) · ㅁ검은괄호 + 스페이스">【】</button><button class="g" data-c="〈〉" data-n="홑화살괄호" data-s="ㅁ꺾쇠" data-cho="ㅎㅎㅅㄱㅎ" title="홑화살괄호 · ㅁ꺾쇠 + 스페이스">〈〉</button><button class="g" data-c="《》" data-n="겹화살괄호" data-s="ㅁ겹꺾쇠" data-cho="ㄱㅎㅅㄱㅎ" title="겹화살괄호 · ㅁ겹꺾쇠 + 스페이스">《》</button><button class="g" data-c="—" data-n="줄표(엠 대시)" data-s="ㅁ줄표" data-cho="ㅈㅍ(ㅇ ㄷㅅ)" title="줄표(엠 대시) · ㅁ줄표 + 스페이스">—</button><button class="g" data-c="✔" data-n="굵은 체크" data-s="ㅁ굵은체크" data-cho="ㄱㅇ ㅊㅋ" title="굵은 체크 · ㅁ굵은체크 + 스페이스">✔</button><button class="g" data-c="✗" data-n="엑스 표시(벌러트 X)" data-s="ㅁ엑스" data-cho="ㅇㅅ ㅍㅅ(ㅂㄹㅌ X)" title="엑스 표시(벌러트 X) · ㅁ엑스 + 스페이스">✗</button><button class="g" data-c="☑" data-n="체크된 체크박스" data-s="ㅁ체크박스" data-cho="ㅊㅋㄷ ㅊㅋㅂㅅ" title="체크된 체크박스 · ㅁ체크박스 + 스페이스">☑</button><button class="g" data-c="⌥" data-n="옵션 키" data-s="ㅁ옵션" data-cho="ㅇㅅ ㅋ" title="옵션 키 · ㅁ옵션 + 스페이스">⌥</button><button class="g" data-c="⇧" data-n="시프트 키" data-s="ㅁ시프트" data-cho="ㅅㅍㅌ ㅋ" title="시프트 키 · ㅁ시프트 + 스페이스">⇧</button><button class="g" data-c="⌃" data-n="컨트롤 키" data-s="ㅁ컨트롤" data-cho="ㅋㅌㄹ ㅋ" title="컨트롤 키 · ㅁ컨트롤 + 스페이스">⌃</button><button class="g" data-c="▸" data-n="작은 오른쪽 삼각형" data-s="ㅁ토글" data-cho="ㅈㅇ ㅇㄹㅉ ㅅㄱㅎ" title="작은 오른쪽 삼각형 · ㅁ토글 + 스페이스">▸</button><button class="g" data-c="–" data-n="엔 대시" data-s="ㅁ엔대시" data-cho="ㅇ ㄷㅅ" title="엔 대시 · ㅁ엔대시 + 스페이스">–</button><button class="g" data-c="☐" data-n="빈 체크박스" data-s="ㅁ빈박스" data-cho="ㅂ ㅊㅋㅂㅅ" title="빈 체크박스 · ㅁ빈박스 + 스페이스">☐</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c4)"></span>조합</div><div class="row"><button class="g long" data-c="★☆☆☆☆" data-n="별점 1점" data-s="ㅁ별점1" data-cho="ㅂㅈ 1ㅈ" title="별점 1점 · ㅁ별점1 + 스페이스">★☆☆☆☆</button><button class="g long" data-c="★★☆☆☆" data-n="별점 2점" data-s="ㅁ별점2" data-cho="ㅂㅈ 2ㅈ" title="별점 2점 · ㅁ별점2 + 스페이스">★★☆☆☆</button><button class="g long" data-c="★★★☆☆" data-n="별점 3점" data-s="ㅁ별점3" data-cho="ㅂㅈ 3ㅈ" title="별점 3점 · ㅁ별점3 + 스페이스">★★★☆☆</button><button class="g long" data-c="★★★★☆" data-n="별점 4점" data-s="ㅁ별점4" data-cho="ㅂㅈ 4ㅈ" title="별점 4점 · ㅁ별점4 + 스페이스">★★★★☆</button><button class="g long" data-c="★★★★★" data-n="별점 5점" data-s="ㅁ별점5" data-cho="ㅂㅈ 5ㅈ" title="별점 5점 · ㅁ별점5 + 스페이스">★★★★★</button></div></div>
-  <div class="sec" id="seal-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--c1)"></span>인감 · 도장</div>
-    <div class="sealrow" id="seal-row"></div>
-  </div>
-  <div class="sec" id="sig-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--accent)"></span>내 서명</div>
-    <div class="sigrow" id="sig-row"></div>
-  </div>
   <div class="status" id="status">기호를 누르면 커서 위치에 바로 입력돼요 · ⌘클릭은 복사만 해요</div>
 </div>
 <script>
@@ -152,7 +118,6 @@ function filter() {
   });
   document.querySelectorAll(".sec").forEach(sec => {
     if (sec.id === "recent-sec" && sec.hidden) return;
-    if (sec.id === "seal-sec" || sec.id === "sig-sec") { if (!sec.hidden) sec.style.display = raw ? "none" : ""; return; }
     const any = [...sec.querySelectorAll("button.g")].some(b => b.style.display !== "none");
     sec.style.display = any ? "" : "none";
   });
@@ -162,7 +127,7 @@ q.addEventListener("input", filter);
 // ---- 키보드 커서: 파란 테두리로 현재 위치, 방향키 이동, Enter 입력 ----
 let sel = null;
 function focusables() {
-  return [...document.querySelectorAll(".sec:not([hidden]) .sealbtn, .sec:not([hidden]) .sigbtn, .sec:not([hidden]) button.g")]
+  return [...document.querySelectorAll(".sec:not([hidden]) button.g")]
     .filter(el => el.offsetParent !== null && el.style.display !== "none");
 }
 function setSel(el) {
@@ -222,42 +187,6 @@ window.setRecent = function (chars) {
     seen.add(ch);
     const src = [...document.querySelectorAll(".sec:not(#recent-sec) button.g")].find(b => b.dataset.c === ch);
     if (src) row.appendChild(src.cloneNode(true));
-  });
-  sec.hidden = row.children.length === 0;
-  refreshSel();
-};
-window.setSeals = function (list) {
-  const sec = document.getElementById("seal-sec");
-  const row = document.getElementById("seal-row");
-  row.innerHTML = "";
-  (Array.isArray(list) ? list : []).forEach(s => {
-    if (!s || !s.id) return;
-    const b = document.createElement("button");
-    b.className = "sealbtn"; b.type = "button";
-    b.title = (s.name || "인감") + " 이미지 복사";
-    if (s.img) { const im = document.createElement("img"); im.src = s.img; im.alt = s.name || "인감"; b.appendChild(im); }
-    const nm = document.createElement("div"); nm.className = "seal-nm"; nm.textContent = s.name || "인감";
-    b.appendChild(nm);
-    b.addEventListener("click", () => post({ action: "seal", id: s.id, name: s.name || "인감" }));
-    row.appendChild(b);
-  });
-  sec.hidden = row.children.length === 0;
-  refreshSel();
-};
-window.setSignatures = function (sigs) {
-  const sec = document.getElementById("sig-sec");
-  const row = document.getElementById("sig-row");
-  row.innerHTML = "";
-  (Array.isArray(sigs) ? sigs : []).forEach(sig => {
-    if (!sig || typeof sig.text !== "string" || !sig.text) return;
-    const b = document.createElement("button");
-    b.className = "sigbtn";
-    b.type = "button";
-    b.innerHTML = "<span class='sn'></span><span class='sp'></span>";
-    b.querySelector(".sn").textContent = sig.name || "서명";
-    b.querySelector(".sp").textContent = sig.text.replace(/\s+/g, " ").trim().slice(0, 26);
-    b.addEventListener("click", () => post({ action: "sig", text: sig.text, name: sig.name || "서명" }));
-    row.appendChild(b);
   });
   sec.hidden = row.children.length === 0;
   refreshSel();
