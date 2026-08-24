@@ -691,5 +691,12 @@
     "ko_name": "별점 5점",
     "priority": 3,
     "category": "combo"
+  },
+  {
+    "shortcut": "ㅁ이노하이",
+    "phrase": "【이노하이】",
+    "ko_name": "이노하이 말머리",
+    "priority": 6,
+    "category": "combo"
   }
 ]

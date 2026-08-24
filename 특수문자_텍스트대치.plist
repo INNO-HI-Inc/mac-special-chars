@@ -596,5 +596,11 @@
 		<key>shortcut</key>
 		<string>ㅁ별점5</string>
 	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>【이노하이】</string>
+		<key>shortcut</key>
+		<string>ㅁ이노하이</string>
+	</dict>
 </array>
 </plist>
