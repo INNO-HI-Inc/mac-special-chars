@@ -54,13 +54,21 @@ local function paletteRect()
   return { x = scr.x + (scr.w - w) / 2, y = scr.y + (scr.h - h) / 2.3, w = w, h = h }
 end
 
+-- Esc는 웹뷰 JS에 맡기지 않고 네이티브 핫키로 잡는다.
+-- 한글 IME가 켜져 있으면 검색창의 Esc를 IME가 조합 취소로 먼저 먹어서
+-- webview의 keydown 핸들러까지 도달하지 못한다. (팔레트는 열릴 때 검색창에 포커스)
+local escHotkey
+
 local function hidePalette(refocus)
+  if escHotkey then escHotkey:disable() end
   if wv and shown then
     wv:hide()
     shown = false
   end
   if refocus and prevWin then prevWin:focus() end
 end
+
+escHotkey = hs.hotkey.new({}, "escape", function() hidePalette(true) end)
 
 local uc = hs.webview.usercontent.new("palette")
 uc:setCallback(function(msg)
@@ -102,6 +110,7 @@ local function showPalette()
   wv:evaluateJavaScript("window.setRecent && setRecent(" .. hs.json.encode(rec) .. ")")
   wv:show()
   shown = true
+  escHotkey:enable()
   hs.timer.doAfter(0.08, function()
     local win = wv:hswindow()
     if win then win:focus() end
