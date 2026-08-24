@@ -7,7 +7,7 @@
 -- UI 수정: special_chars_palette.html (재빌드 시 덮어써짐)
 -- ============================================================
 
-local CHAR_COUNT = 99
+local CHAR_COUNT = 0  -- loadHtml에서 실제 버튼 수로 채워진다
 -- 로컬 전용 팔레트(.local.html)가 설치돼 있으면 그쪽을 우선 사용한다.
 -- 개인 항목은 공개 저장소의 special_chars_palette.html에는 들어가지 않는다.
 local function paletteFile()
@@ -40,6 +40,8 @@ local function loadHtml()
   end
   local s = f:read("*a")
   f:close()
+  local _, n = s:gsub('class="g', '')
+  CHAR_COUNT = n
   return s
 end
 
@@ -58,9 +60,11 @@ end
 -- 한글 IME가 켜져 있으면 검색창의 Esc를 IME가 조합 취소로 먼저 먹어서
 -- webview의 keydown 핸들러까지 도달하지 못한다. (팔레트는 열릴 때 검색창에 포커스)
 local escHotkey
+local focusChecker
 
 local function hidePalette(refocus)
   if escHotkey then escHotkey:disable() end
+  if focusChecker then focusChecker:stop(); focusChecker = nil end
   if wv and shown then
     wv:hide()
     shown = false
@@ -111,6 +115,15 @@ local function showPalette()
   wv:show()
   shown = true
   escHotkey:enable()
+  -- 팔레트는 borderless floating이라 포커스를 잃어도 떠 있는다.
+  -- 그 상태로 두면 Esc 핫키가 다른 앱의 Esc까지 가로채므로, 포커스가 떠나면 닫는다.
+  if focusChecker then focusChecker:stop() end
+  focusChecker = hs.timer.doEvery(0.4, function()
+    if not shown then return end
+    local pw = wv and wv:hswindow()
+    local fw = hs.window.focusedWindow()
+    if pw and fw and fw:id() ~= pw:id() then hidePalette(false) end
+  end)
   hs.timer.doAfter(0.08, function()
     local win = wv:hswindow()
     if win then win:focus() end
@@ -125,7 +138,7 @@ end)
 -- 터미널 검증용:
 --   hs -c "SpecialChars.probe()" && sleep 1 && hs -c "print(hs.settings.get('specialchars.probe'))"
 SpecialChars = {
-  count = CHAR_COUNT,
+  count = function() return CHAR_COUNT end,
   version = 5,
   show = showPalette,
   hide = function() hidePalette(true) end,
