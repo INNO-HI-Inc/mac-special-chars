@@ -4,7 +4,7 @@
 
 `ㅁ별`+스페이스 → ★ · `ㅁ참고` → ※ · `ㅁ1` → ① · `ㅁ제곱미터` → ㎡ … **총 99개**
 
-**치트시트(웹)**: https://khwee2000.github.io/mac-special-chars/ — 검색(초성·영문 별칭 지원), 클릭 복사, 즐겨찾기, 외우기 퀴즈
+**치트시트(웹)**: [`index.html`](./index.html) 을 브라우저로 열면 됩니다 — 검색(초성·영문 별칭 지원), 클릭 복사, 즐겨찾기, 외우기 퀴즈
 
 ## 1. 텍스트 대치 설치 — 필수, 1분
 
@@ -25,7 +25,7 @@
 
 ```sh
 brew install --cask hammerspoon   # Hammerspoon이 없다면
-git clone https://github.com/khwee2000/mac-special-chars.git
+git clone https://github.com/INNO-HI-Inc/mac-special-chars.git
 cd mac-special-chars && ./install.sh
 ```
 
