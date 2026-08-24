@@ -8,7 +8,15 @@
 -- ============================================================
 
 local CHAR_COUNT = 99
-local PALETTE_FILE = hs.configdir .. "/special_chars_palette.html"
+-- 로컬 전용 팔레트(.local.html)가 설치돼 있으면 그쪽을 우선 사용한다.
+-- 개인 항목은 공개 저장소의 special_chars_palette.html에는 들어가지 않는다.
+local function paletteFile()
+  local localFile = hs.configdir .. "/special_chars_palette.local.html"
+  local f = io.open(localFile, "r")
+  if f then f:close(); return localFile end
+  return hs.configdir .. "/special_chars_palette.html"
+end
+local PALETTE_FILE = paletteFile()
 
 local RECENT_KEY = "specialchars.recent"
 local COUNT_KEY = "specialchars.counts"
@@ -24,6 +32,7 @@ local function remember(ch)
 end
 
 local function loadHtml()
+  PALETTE_FILE = paletteFile()
   local f = io.open(PALETTE_FILE, "r")
   if not f then
     hs.alert.show("special_chars_palette.html 없음 — 재빌드 필요")

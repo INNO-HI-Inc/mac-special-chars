@@ -1,0 +1,16 @@
+[
+  {
+    "shortcut": "ㅁ내번호",
+    "phrase": "010-0000-0000",
+    "ko_name": "내 연락처",
+    "priority": 1,
+    "category": "personal"
+  },
+  {
+    "shortcut": "ㅁ내메일",
+    "phrase": "me@example.com",
+    "ko_name": "내 이메일",
+    "priority": 2,
+    "category": "personal"
+  }
+]

@@ -173,6 +173,27 @@ cd mac-special-chars && ./install.sh
 2. `python3 scripts/build.py` — plist·치트시트(index.html)·팔레트가 한 번에 재생성됩니다
 3. plist를 다시 드래그하고, 팔레트는 `./install.sh` 후 Hammerspoon 리로드
 
+### 개인 항목 — 로컬 전용
+
+연락처·이메일처럼 **공개하면 안 되는 값**은 `entries.json`이 아니라 `entries.local.json` 에 넣습니다.
+이 파일은 `.gitignore` 대상이라 저장소에 올라가지 않습니다.
+
+```sh
+cp entries.local.example.json entries.local.json   # 형식 참고
+# entries.local.json 편집 후
+python3 scripts/build.py && ./install.sh
+```
+
+빌드하면 개인 항목은 **`.local.` 산출물에만** 병합됩니다.
+
+| 산출물 | 개인 항목 | git |
+|---|---|---|
+| `entries.json` · `index.html` · `특수문자_텍스트대치.plist` · `special_chars_palette.html` | 미포함 | 커밋됨 |
+| `특수문자_텍스트대치.local.plist` · `special_chars_palette.local.html` | 포함 | 제외 |
+
+텍스트 대치는 `특수문자_텍스트대치.local.plist` 를 드래그하고, 팔레트는 `.local.html` 이 있으면 자동으로 그쪽을 씁니다.
+단축어가 공개 항목과 겹치면 빌드가 중단됩니다.
+
 ## 라이선스
 
 [MIT](./LICENSE)

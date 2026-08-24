@@ -17,10 +17,33 @@ if dups:
 bad = [e for e in entries if not e["shortcut"].startswith("ㅁ") or not e["phrase"]]
 if bad:
     sys.exit(f"FATAL: 형식 오류 {bad}")
-cats = ["hanja-classic", "work-units", "punct-modern", "combo"]
+cats = ["hanja-classic", "work-units", "punct-modern", "combo", "personal"]
 order = {c: i for i, c in enumerate(cats)}
 entries.sort(key=lambda e: (order.get(e["category"], 9), e["priority"]))
 print(f"OK: {len(entries)}개 항목, 중복 없음")
+
+# --- 로컬 전용 항목 (entries.local.json, git 제외) ---
+# 개인정보(연락처 등)는 공개 산출물(entries.json·plist·index.html·팔레트)에 절대 넣지 않고,
+# .local. 접미사가 붙은 gitignore 대상 산출물에만 병합한다.
+LOCAL_SRC = ROOT / "entries.local.json"
+local_entries = []
+if LOCAL_SRC.exists():
+    local_entries = json.loads(LOCAL_SRC.read_text(encoding="utf-8"))
+    bad_l = [e for e in local_entries
+             if not e["shortcut"].startswith("ㅁ") or not e["phrase"]]
+    if bad_l:
+        sys.exit(f"FATAL: 로컬 형식 오류 {bad_l}")
+    clash = {e["shortcut"] for e in local_entries} & set(shortcuts)
+    if clash:
+        sys.exit(f"FATAL: 로컬 단축어가 공개 항목과 충돌 {clash}")
+    l_dups = [e["shortcut"] for e in local_entries]
+    l_dup = {x for x in l_dups if l_dups.count(x) > 1}
+    if l_dup:
+        sys.exit(f"FATAL: 로컬 단축어 중복 {l_dup}")
+    print(f"로컬: {len(local_entries)}개 항목 (공개 산출물에는 제외)")
+
+all_entries = sorted(entries + local_entries,
+                     key=lambda e: (order.get(e["category"], 9), e["priority"]))
 
 DEST.mkdir(exist_ok=True)
 
@@ -28,6 +51,14 @@ DEST.mkdir(exist_ok=True)
 plist_data = [{"phrase": e["phrase"], "shortcut": e["shortcut"]} for e in entries]
 with open(DEST / "특수문자_텍스트대치.plist", "wb") as f:
     plistlib.dump(plist_data, f)
+
+LOCAL_PLIST = DEST / "특수문자_텍스트대치.local.plist"
+if local_entries:
+    with open(LOCAL_PLIST, "wb") as f:
+        plistlib.dump([{"phrase": e["phrase"], "shortcut": e["shortcut"]}
+                       for e in all_entries], f)
+elif LOCAL_PLIST.exists():
+    LOCAL_PLIST.unlink()
 
 # --- 2. entries.json ---
 (DEST / "entries.json").write_text(
@@ -47,27 +78,31 @@ cat_meta = {
     "work-units": ("업무 · 단위 · 번호", "--c2"),
     "punct-modern": ("괄호 · 문장부호 · 맥 키", "--c3"),
     "combo": ("조합", "--c4"),
+    "personal": ("개인 — 로컬 전용", "--c4"),
 }
 def att(s):
     return htmlmod.escape(str(s), quote=True)
 
-sections_html = []
-for c in cats:
-    rows = [e for e in entries if e["category"] == c]
-    if not rows:
-        continue
-    title, color = cat_meta[c]
-    btns = []
-    for e in rows:
-        long_cls = " long" if len(e["phrase"]) > 2 else ""
-        btns.append(
-            f'<button class="g{long_cls}" data-c="{att(e["phrase"])}" data-n="{att(e["ko_name"])}" '
-            f'data-s="{att(e["shortcut"])}" data-cho="{att(cho(e["ko_name"]))}" '
-            f'title="{att(e["ko_name"])} · {att(e["shortcut"])} + 스페이스">{att(e["phrase"])}</button>')
-    sections_html.append(
-        f'<div class="sec"><div class="lbl"><span class="dot" style="background:var({color})"></span>{att(title)}</div>'
-        f'<div class="row">{"".join(btns)}</div></div>')
-SECTIONS = "".join(sections_html)
+def build_sections(entry_list):
+    sections_html = []
+    for c in cats:
+        rows = [e for e in entry_list if e["category"] == c]
+        if not rows:
+            continue
+        title, color = cat_meta[c]
+        btns = []
+        for e in rows:
+            long_cls = " long" if len(e["phrase"]) > 2 else ""
+            btns.append(
+                f'<button class="g{long_cls}" data-c="{att(e["phrase"])}" data-n="{att(e["ko_name"])}" '
+                f'data-s="{att(e["shortcut"])}" data-cho="{att(cho(e["ko_name"]))}" '
+                f'title="{att(e["ko_name"])} · {att(e["shortcut"])} + 스페이스">{att(e["phrase"])}</button>')
+        sections_html.append(
+            f'<div class="sec"><div class="lbl"><span class="dot" style="background:var({color})"></span>{att(title)}</div>'
+            f'<div class="row">{"".join(btns)}</div></div>')
+    return "".join(sections_html)
+
+SECTIONS = build_sections(entries)
 
 palette_html = """<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><style>
@@ -271,6 +306,12 @@ window.resetAndFocus = function () {
 </body></html>
 """
 PALETTE.write_text(palette_html.replace("@@SECTIONS@@", SECTIONS), encoding="utf-8")
+PALETTE_LOCAL = ROOT / "hammerspoon" / "special_chars_palette.local.html"
+if local_entries:
+    PALETTE_LOCAL.write_text(
+        palette_html.replace("@@SECTIONS@@", build_sections(all_entries)), encoding="utf-8")
+elif PALETTE_LOCAL.exists():
+    PALETTE_LOCAL.unlink()
 
 # --- 3b. Hammerspoon Lua (v4: webview 버튼 그리드) ---
 lua_template = r"""-- ============================================================
@@ -283,7 +324,15 @@ lua_template = r"""-- ==========================================================
 -- ============================================================
 
 local CHAR_COUNT = @@COUNT@@
-local PALETTE_FILE = hs.configdir .. "/special_chars_palette.html"
+-- 로컬 전용 팔레트(.local.html)가 설치돼 있으면 그쪽을 우선 사용한다.
+-- 개인 항목은 공개 저장소의 special_chars_palette.html에는 들어가지 않는다.
+local function paletteFile()
+  local localFile = hs.configdir .. "/special_chars_palette.local.html"
+  local f = io.open(localFile, "r")
+  if f then f:close(); return localFile end
+  return hs.configdir .. "/special_chars_palette.html"
+end
+local PALETTE_FILE = paletteFile()
 
 local RECENT_KEY = "specialchars.recent"
 local COUNT_KEY = "specialchars.counts"
@@ -299,6 +348,7 @@ local function remember(ch)
 end
 
 local function loadHtml()
+  PALETTE_FILE = paletteFile()
   local f = io.open(PALETTE_FILE, "r")
   if not f then
     hs.alert.show("special_chars_palette.html 없음 — 재빌드 필요")
