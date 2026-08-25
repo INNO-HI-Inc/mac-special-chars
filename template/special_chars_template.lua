@@ -214,7 +214,8 @@ local function buildWebview()
 end
 buildWebview()
 
-local function showPalette()
+local function showPalette(opts)
+  opts = opts or {}
   prevWin = hs.window.frontmostWindow()
   local scr = targetScreen()
   hs.settings.set(LASTSCREEN_KEY, scr:id())
@@ -231,13 +232,17 @@ local function showPalette()
   escHotkey:enable()
   -- 팔레트는 borderless floating이라 포커스를 잃어도 떠 있는다.
   -- 그 상태로 두면 Esc 핫키가 다른 앱의 Esc까지 가로채므로, 포커스가 떠나면 닫는다.
-  if focusChecker then focusChecker:stop() end
-  focusChecker = hs.timer.doEvery(0.4, function()
-    if not shown then return end
-    local pw = wv and wv:hswindow()
-    local fw = hs.window.focusedWindow()
-    if pw and fw and fw:id() ~= pw:id() then hidePalette(false) end
-  end)
+  if focusChecker then focusChecker:stop(); focusChecker = nil end
+  -- 데모·문서 촬영용(noAutoHide)일 때는 감시 타이머만 걸지 않는다.
+  -- 아래 포커스·검색창 초기화는 두 경우 모두 필요하다.
+  if not opts.noAutoHide then
+    focusChecker = hs.timer.doEvery(0.4, function()
+      if not shown then return end
+      local pw = wv and wv:hswindow()
+      local fw = hs.window.focusedWindow()
+      if pw and fw and fw:id() ~= pw:id() then hidePalette(false) end
+    end)
+  end
 
   hs.timer.doAfter(0.08, function()
     local win = wv:hswindow()
@@ -251,7 +256,7 @@ local HOT = CFG.hotkey or {}
 local MODS = HOT.mods or { "alt" }
 local KEY = HOT.key or "space"
 hs.hotkey.bind(MODS, KEY, function()
-  if shown then hidePalette(true) else showPalette() end
+  if shown then hidePalette(true) else showPalette({}) end
 end)
 
 -- 터미널 검증용:
@@ -259,7 +264,9 @@ end)
 SpecialChars = {
   version = VERSION,
   count = function() return CHAR_COUNT end,
-  show = showPalette,
+  show = function() showPalette({}) end,
+  -- 자동 닫기 없이 띄운다 (시연·문서 촬영). 닫기는 SpecialChars.hide()
+  demo = function() showPalette({ noAutoHide = true }) end,
   hide = function() hidePalette(true) end,
   isShown = function() return shown end,
   reload = function()                                -- (#74)

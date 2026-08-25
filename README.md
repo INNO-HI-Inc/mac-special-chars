@@ -21,7 +21,20 @@
 
 - **클릭** = 커서 위치에 바로 입력 + 복사 · **⌘클릭** = 복사만
 - **키보드 조작**: 파란 테두리 커서를 **방향키(←→↑↓)**로 옮기고 **Enter**로 입력해요
-- 검색: 이름·단축어·**초성**(ㅂㅈ→별점) · 최근 사용 줄이 맨 위에 표시
+- 검색: 이름 · 단축어 · **초성**(ㅂㅈ→별점) · **영문**(star) · **유니코드**(U+2605)
+- 즐겨찾기(⌃클릭) · 자주 쓰는 항목 · 섹션 접기 — 상태가 저장됩니다
+- 팔레트 안에서 **`?`** 를 누르면 전체 단축키가 나옵니다
+
+| 키 | 동작 |
+|---|---|
+| `Enter` | 커서 위치에 입력하고 닫기 |
+| `⌘Enter` | 복사만 |
+| `⇧Enter` | 입력하고 **닫지 않기** (연속 입력) |
+| `⌥Enter` | 기호 이름 복사 |
+| `⌃Enter` | 즐겨찾기 |
+| `←→↑↓` `Tab` `Home/End` `PageUp/Down` | 이동 |
+| `⌥1…9` / `⌃1…9` | 섹션 점프 / N번째 즉시 입력 |
+| `Esc` | 검색어 있으면 지우기, 없으면 닫기 |
 
 ```sh
 brew install --cask hammerspoon   # Hammerspoon이 없다면
@@ -194,6 +207,84 @@ python3 scripts/build.py && ./install.sh
 
 텍스트 대치는 `특수문자_텍스트대치.local.plist` 를 드래그하고, 팔레트는 `.local.html` 이 있으면 자동으로 그쪽을 씁니다.
 단축어가 공개 항목과 겹치면 빌드가 중단됩니다.
+
+### 설정
+
+`config.json` 에서 핫키·팔레트 크기·입력 방식을 바꿉니다.
+개인 설정은 `config.local.json` (git 제외) 으로 덮어쓸 수 있습니다.
+
+```jsonc
+{
+  "hotkey":  { "mods": ["alt"], "key": "space" },
+  "palette": { "width": 760, "maxRecent": 10, "highContrast": false },
+  "input":   { "pasteThreshold": 4, "restoreClipboard": true },
+  "privacy": { "excludePersonalFromRecent": true }
+}
+```
+
+`input.pasteThreshold` 자 이상은 키 입력 대신 **붙여넣기**로 넣습니다.
+주소·계좌번호처럼 긴 값이 안정적으로 들어갑니다.
+
+## 도구
+
+```sh
+python3 scripts/build.py --check      # 검증만 (파일 안 씀)
+python3 scripts/build.py --watch      # 소스 바뀌면 자동 재빌드
+python3 scripts/smoke.py              # 스모크 테스트 (개인정보 격리 포함)
+python3 scripts/textreplace.py        # 시스템 텍스트 대치 등록 현황 비교
+python3 scripts/textreplace.py --backup   # 현재 등록분 백업
+./uninstall.sh                        # 팔레트 제거
+```
+
+## 문제 해결
+
+**텍스트 대치가 안 먹혀요**
+`python3 scripts/textreplace.py` 로 실제 등록 여부를 확인하세요.
+「미등록 N개」가 나오면 plist를 아직 안 넣은 겁니다. 한글 입력 상태에서
+단축어를 치고 **스페이스**를 눌러야 바뀝니다.
+
+**팔레트가 안 떠요**
+Hammerspoon이 실행 중인지, `~/.hammerspoon/init.lua` 에
+`require("special_chars")` 가 있는지 확인하고 리로드하세요.
+
+**Esc로 안 닫혀요**
+1.1.0에서 고쳤습니다. 재빌드 후 `./install.sh` 하고 Hammerspoon을 리로드하세요.
+
+**기호가 입력이 안 되고 복사만 돼요**
+시스템 설정 → 개인정보 보호 및 보안 → **손쉬운 사용** 에서 Hammerspoon을 허용하세요.
+
+**인감·서명 기능이 사라졌어요**
+`build_local.py`(별도 로컬 저장소)와 이 저장소는 같은 파일에 씁니다.
+1.1.0의 `install.sh` 는 이를 감지하면 멈춥니다. 서명 텍스트는
+`entries.local.json` 으로 옮기는 편이 낫습니다.
+
+## 개인정보
+
+연락처·주소·계좌처럼 공개하면 안 되는 값은 **`entries.json` 에 넣지 마세요.**
+`entries.local.json` (git 제외) 에 넣으면 `.local.` 산출물에만 병합됩니다.
+
+| 산출물 | 개인 항목 | git |
+|---|---|---|
+| `entries.json` · `index.html` · `특수문자_텍스트대치.plist` · `palette.html` | 미포함 | 커밋됨 |
+| `특수문자_텍스트대치.local.plist` · `palette.local.html` | 포함 | 제외 |
+
+`python3 scripts/smoke.py` 가 공개 산출물과 **커밋 히스토리까지** 훑어
+개인 값이 새지 않았는지 검사합니다. 커밋 전에 돌리세요.
+
+개인 항목은 「최근」 기록에도 남지 않습니다. 다만 일반 항목의 사용 기록은
+`~/Library/Preferences/org.hammerspoon.Hammerspoon.plist` 에 평문으로 저장됩니다.
+
+## 접근성
+
+- 모든 버튼에 `aria-label`, 섹션에 `aria-expanded`
+- 마우스 없이 전부 조작 가능 (`?` 로 단축키 확인)
+- 고대비 모드 (`palette.highContrast`), 글자 크기 3단계
+- `prefers-reduced-motion` 존중
+
+## 버전
+
+현재 **1.1.0**. 변경 내역은 [CHANGELOG.md](./CHANGELOG.md).
+버전은 `scripts/build.py` 의 `VERSION` 하나로 관리되며 lua·팔레트·치트시트에 주입됩니다.
 
 ## 라이선스
 

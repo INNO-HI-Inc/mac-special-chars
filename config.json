@@ -1,5 +1,10 @@
 {
-  "hotkey": { "mods": ["alt"], "key": "space" },
+  "hotkey": {
+    "mods": [
+      "alt"
+    ],
+    "key": "space"
+  },
   "palette": {
     "width": 760,
     "height": 660,
@@ -15,6 +20,14 @@
     "restoreClipboard": true,
     "inputDelay": 0.15
   },
-  "privacy": { "excludePersonalFromRecent": true },
-  "display": { "followMouse": true, "fade": true }
+  "privacy": {
+    "excludePersonalFromRecent": true
+  },
+  "display": {
+    "followMouse": true,
+    "fade": true
+  },
+  "plist": {
+    "includePersonal": true
+  }
 }

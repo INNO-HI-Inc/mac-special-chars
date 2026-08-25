@@ -13,6 +13,9 @@
 """
 import json, plistlib, pathlib, sys, time, html as htmlmod
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from alias import alias_for   # 치트시트와 공유하는 한글→영문 별칭 사전 (#15,85)
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEST = ROOT
 HS = ROOT / "hammerspoon" / "special_chars.lua"
@@ -167,7 +170,9 @@ def build_sections(entry_list):
         btns = []
         for e in rows:
             long_cls = " long" if len(e["phrase"]) > 2 else ""
-            aliases = " ".join(e.get("aliases", []))
+            # 명시된 aliases가 있으면 그걸 쓰고, 없으면 사전에서 만들어 준다.
+            aliases = (" ".join(e["aliases"]) if e.get("aliases")
+                       else alias_for(e["ko_name"], e["shortcut"]))
             btns.append(
                 f'<button class="g{long_cls}" role="gridcell" '
                 f'data-c="{att(e["phrase"])}" data-n="{att(e["ko_name"])}" '
@@ -250,12 +255,29 @@ def build():
             plistlib.dump([{"phrase": e["phrase"], "shortcut": e["shortcut"]} for e in rows], f)
 
     dump_plist(DEST / "특수문자_텍스트대치.plist", entries)
+    inc_personal = (cfg.get("plist") or {}).get("includePersonal", True)
     if local_entries:
-        dump_plist(LOCAL_PLIST, all_entries)
+        rows = all_entries if inc_personal else entries
+        dump_plist(LOCAL_PLIST, rows)
+        if not inc_personal:
+            warn("config plist.includePersonal=false — 개인 항목은 텍스트 대치에서 빠집니다")
         warn("텍스트 대치에는 .local.plist 하나만 등록하세요. "
              "공개 plist와 둘 다 등록하면 항목이 중복됩니다.")
     elif LOCAL_PLIST.exists():
         LOCAL_PLIST.unlink()
+
+    # plist 매니페스트 — 어떤 판을 시스템에 등록했는지 대조용 (#82)
+    import hashlib
+    man = ["# 이 파일은 build.py가 생성합니다. 등록한 plist 판을 대조할 때 쓰세요.",
+           f"생성: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+           f"버전: {VERSION}"]
+    for label, path, rows in (("공개", DEST / "특수문자_텍스트대치.plist", entries),
+                              ("로컬", LOCAL_PLIST, all_entries if local_entries else None)):
+        if rows is None or not path.exists():
+            continue
+        h = hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+        man.append(f"{label}: {len(rows)}개 · sha256:{h} · {path.name}")
+    (ROOT / "docs" / "plist-manifest.txt").write_text("\n".join(man) + "\n", encoding="utf-8")
 
     # 2. entries.json 정규화 재기록
     (DEST / "entries.json").write_text(
