@@ -4,12 +4,6 @@
 <array>
 	<dict>
 		<key>phrase</key>
-		<string>※</string>
-		<key>shortcut</key>
-		<string>ㅁ참고</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
 		<string>★</string>
 		<key>shortcut</key>
 		<string>ㅁ별</string>
@@ -22,21 +16,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>♥</string>
+		<string>○</string>
 		<key>shortcut</key>
-		<string>ㅁ하트</string>
+		<string>ㅁ빈원</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
 		<string>♡</string>
 		<key>shortcut</key>
 		<string>ㅁ빈하트</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>✓</string>
-		<key>shortcut</key>
-		<string>ㅁ체크</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -52,21 +40,75 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>○</string>
+		<string>※</string>
 		<key>shortcut</key>
-		<string>ㅁ빈원</string>
+		<string>ㅁ참고</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>←</string>
+		<string>✓</string>
 		<key>shortcut</key>
-		<string>ㅁ왼</string>
+		<string>ㅁ체크</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>↑</string>
+		<string>♥</string>
 		<key>shortcut</key>
-		<string>ㅁ위</string>
+		<string>ㅁ하트</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>⇒</string>
+		<key>shortcut</key>
+		<string>ㅁ겹우</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>◎</string>
+		<key>shortcut</key>
+		<string>ㅁ겹원</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>♬</string>
+		<key>shortcut</key>
+		<string>ㅁ겹음표</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>■</string>
+		<key>shortcut</key>
+		<string>ㅁ네모</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>◆</string>
+		<key>shortcut</key>
+		<string>ㅁ마름모</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>□</string>
+		<key>shortcut</key>
+		<string>ㅁ빈네모</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>◇</string>
+		<key>shortcut</key>
+		<string>ㅁ빈마름모</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>△</string>
+		<key>shortcut</key>
+		<string>ㅁ빈세모</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>▲</string>
+		<key>shortcut</key>
+		<string>ㅁ세모</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -82,57 +124,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>⇒</string>
-		<key>shortcut</key>
-		<string>ㅁ겹우</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>■</string>
-		<key>shortcut</key>
-		<string>ㅁ네모</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>□</string>
-		<key>shortcut</key>
-		<string>ㅁ빈네모</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>◎</string>
-		<key>shortcut</key>
-		<string>ㅁ겹원</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>▲</string>
-		<key>shortcut</key>
-		<string>ㅁ세모</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>△</string>
-		<key>shortcut</key>
-		<string>ㅁ빈세모</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
 		<string>▼</string>
 		<key>shortcut</key>
 		<string>ㅁ역세모</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>◆</string>
+		<string>←</string>
 		<key>shortcut</key>
-		<string>ㅁ마름모</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>◇</string>
-		<key>shortcut</key>
-		<string>ㅁ빈마름모</string>
+		<string>ㅁ왼</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -148,9 +148,9 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>☎</string>
+		<string>↑</string>
 		<key>shortcut</key>
-		<string>ㅁ전화</string>
+		<string>ㅁ위</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -160,9 +160,9 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>♬</string>
+		<string>☎</string>
 		<key>shortcut</key>
-		<string>ㅁ겹음표</string>
+		<string>ㅁ전화</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -181,18 +181,6 @@
 		<string>↘</string>
 		<key>shortcut</key>
 		<string>ㅁ우하</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>℃</string>
-		<key>shortcut</key>
-		<string>ㅁ섭씨</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>×</string>
-		<key>shortcut</key>
-		<string>ㅁ곱</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -226,9 +214,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>㈜</string>
+		<string>×</string>
 		<key>shortcut</key>
-		<string>ㅁ주식</string>
+		<string>ㅁ곱</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>℃</string>
+		<key>shortcut</key>
+		<string>ㅁ섭씨</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -238,117 +232,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>°</string>
+		<string>㈜</string>
 		<key>shortcut</key>
-		<string>ㅁ각도</string>
+		<string>ㅁ주식</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>©</string>
+		<string>⑩</string>
 		<key>shortcut</key>
-		<string>ㅁ저작권</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>±</string>
-		<key>shortcut</key>
-		<string>ㅁ플마</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>÷</string>
-		<key>shortcut</key>
-		<string>ㅁ나누기</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>≒</string>
-		<key>shortcut</key>
-		<string>ㅁ약</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>≠</string>
-		<key>shortcut</key>
-		<string>ㅁ다름</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>≥</string>
-		<key>shortcut</key>
-		<string>ㅁ이상</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>≤</string>
-		<key>shortcut</key>
-		<string>ㅁ이하</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>²</string>
-		<key>shortcut</key>
-		<string>ㅁ제곱</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>³</string>
-		<key>shortcut</key>
-		<string>ㅁ세제곱</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎏</string>
-		<key>shortcut</key>
-		<string>ㅁ킬로그램</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎜</string>
-		<key>shortcut</key>
-		<string>ㅁ밀리미터</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎝</string>
-		<key>shortcut</key>
-		<string>ㅁ센티</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎞</string>
-		<key>shortcut</key>
-		<string>ㅁ킬로미터</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>ℓ</string>
-		<key>shortcut</key>
-		<string>ㅁ리터</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎖</string>
-		<key>shortcut</key>
-		<string>ㅁ밀리리터</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎥</string>
-		<key>shortcut</key>
-		<string>ㅁ세제곱미터</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㎥</string>
-		<key>shortcut</key>
-		<string>ㅁ루베</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>€</string>
-		<key>shortcut</key>
-		<string>ㅁ유로</string>
+		<string>ㅁ10</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -376,39 +268,27 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>⑩</string>
+		<string>°</string>
 		<key>shortcut</key>
-		<string>ㅁ10</string>
+		<string>ㅁ각도</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>㉠</string>
+		<string>÷</string>
 		<key>shortcut</key>
-		<string>ㅁ원ㄱ</string>
+		<string>ㅁ나누기</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>㉡</string>
+		<string>≠</string>
 		<key>shortcut</key>
-		<string>ㅁ원ㄴ</string>
+		<string>ㅁ다름</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>㉢</string>
+		<string>®</string>
 		<key>shortcut</key>
-		<string>ㅁ원ㄷ</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㉣</string>
-		<key>shortcut</key>
-		<string>ㅁ원ㄹ</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>㉤</string>
-		<key>shortcut</key>
-		<string>ㅁ원ㅁ</string>
+		<string>ㅁ등록상표</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -442,21 +322,147 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
+		<string>㎥</string>
+		<key>shortcut</key>
+		<string>ㅁ루베</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>ℓ</string>
+		<key>shortcut</key>
+		<string>ㅁ리터</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎖</string>
+		<key>shortcut</key>
+		<string>ㅁ밀리리터</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎜</string>
+		<key>shortcut</key>
+		<string>ㅁ밀리미터</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
 		<string>™</string>
 		<key>shortcut</key>
 		<string>ㅁ상표</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>®</string>
+		<string>³</string>
 		<key>shortcut</key>
-		<string>ㅁ등록상표</string>
+		<string>ㅁ세제곱</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎥</string>
+		<key>shortcut</key>
+		<string>ㅁ세제곱미터</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎝</string>
+		<key>shortcut</key>
+		<string>ㅁ센티</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>≒</string>
+		<key>shortcut</key>
+		<string>ㅁ약</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㉠</string>
+		<key>shortcut</key>
+		<string>ㅁ원ㄱ</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㉡</string>
+		<key>shortcut</key>
+		<string>ㅁ원ㄴ</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㉢</string>
+		<key>shortcut</key>
+		<string>ㅁ원ㄷ</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㉣</string>
+		<key>shortcut</key>
+		<string>ㅁ원ㄹ</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㉤</string>
+		<key>shortcut</key>
+		<string>ㅁ원ㅁ</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>€</string>
+		<key>shortcut</key>
+		<string>ㅁ유로</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>≥</string>
+		<key>shortcut</key>
+		<string>ㅁ이상</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>≤</string>
+		<key>shortcut</key>
+		<string>ㅁ이하</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>©</string>
+		<key>shortcut</key>
+		<string>ㅁ저작권</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>²</string>
+		<key>shortcut</key>
+		<string>ㅁ제곱</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎏</string>
+		<key>shortcut</key>
+		<string>ㅁ킬로그램</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>㎞</string>
+		<key>shortcut</key>
+		<string>ㅁ킬로미터</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>±</string>
+		<key>shortcut</key>
+		<string>ㅁ플마</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
 		<string>「」</string>
 		<key>shortcut</key>
 		<string>ㅁ낫표</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>•</string>
+		<key>shortcut</key>
+		<string>ㅁ불릿</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -478,27 +484,9 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>•</string>
-		<key>shortcut</key>
-		<string>ㅁ불릿</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>『』</string>
-		<key>shortcut</key>
-		<string>ㅁ겹낫표</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
 		<string>【】</string>
 		<key>shortcut</key>
 		<string>ㅁ검은괄호</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>〈〉</string>
-		<key>shortcut</key>
-		<string>ㅁ꺾쇠</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -508,9 +496,9 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>—</string>
+		<string>『』</string>
 		<key>shortcut</key>
-		<string>ㅁ줄표</string>
+		<string>ㅁ겹낫표</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -520,15 +508,21 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>✗</string>
+		<string>〈〉</string>
 		<key>shortcut</key>
-		<string>ㅁ엑스</string>
+		<string>ㅁ꺾쇠</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>☑</string>
+		<string>⇧</string>
 		<key>shortcut</key>
-		<string>ㅁ체크박스</string>
+		<string>ㅁ시프트</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>✗</string>
+		<key>shortcut</key>
+		<string>ㅁ엑스</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -538,9 +532,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>⇧</string>
+		<string>—</string>
 		<key>shortcut</key>
-		<string>ㅁ시프트</string>
+		<string>ㅁ줄표</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>☑</string>
+		<key>shortcut</key>
+		<string>ㅁ체크박스</string>
 	</dict>
 	<dict>
 		<key>phrase</key>
@@ -556,15 +556,15 @@
 	</dict>
 	<dict>
 		<key>phrase</key>
-		<string>–</string>
-		<key>shortcut</key>
-		<string>ㅁ엔대시</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
 		<string>☐</string>
 		<key>shortcut</key>
 		<string>ㅁ빈박스</string>
+	</dict>
+	<dict>
+		<key>phrase</key>
+		<string>–</string>
+		<key>shortcut</key>
+		<string>ㅁ엔대시</string>
 	</dict>
 	<dict>
 		<key>phrase</key>

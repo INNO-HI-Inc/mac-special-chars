@@ -1,71 +1,145 @@
 #!/usr/bin/env python3
-"""entries.json → plist / 팔레트(lua+html) / 치트시트(index.html) 생성"""
-import json, plistlib, pathlib, sys, html as htmlmod
+"""entries.json → plist / 팔레트(lua+html) / 치트시트(index.html) 생성
+
+사용법:
+  python3 scripts/build.py            빌드
+  python3 scripts/build.py --check    검증만 (파일 안 씀, CI용)
+  python3 scripts/build.py --watch    소스 변경 시 자동 재빌드
+  python3 scripts/build.py --quiet    요약만 출력
+
+개인정보(연락처 등)는 entries.local.json 에만 두며, 공개 산출물
+(entries.json·특수문자_텍스트대치.plist·index.html·팔레트 html)에는
+절대 들어가지 않는다. 로컬 항목은 .local. 접미사 산출물에만 병합된다.
+"""
+import json, plistlib, pathlib, sys, time, html as htmlmod
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEST = ROOT
 HS = ROOT / "hammerspoon" / "special_chars.lua"
 PALETTE = ROOT / "hammerspoon" / "special_chars_palette.html"
-
-entries = json.loads((ROOT / "entries.json").read_text())
-
-# --- 검증 ---
-shortcuts = [e["shortcut"] for e in entries]
-dups = {s for s in shortcuts if shortcuts.count(s) > 1}
-if dups:
-    sys.exit(f"FATAL: 단축어 중복 {dups}")
-bad = [e for e in entries if not e["shortcut"].startswith("ㅁ") or not e["phrase"]]
-if bad:
-    sys.exit(f"FATAL: 형식 오류 {bad}")
-cats = ["hanja-classic", "work-units", "punct-modern", "combo", "personal"]
-order = {c: i for i, c in enumerate(cats)}
-entries.sort(key=lambda e: (order.get(e["category"], 9), e["priority"]))
-print(f"OK: {len(entries)}개 항목, 중복 없음")
-
-# --- 로컬 전용 항목 (entries.local.json, git 제외) ---
-# 개인정보(연락처 등)는 공개 산출물(entries.json·plist·index.html·팔레트)에 절대 넣지 않고,
-# .local. 접미사가 붙은 gitignore 대상 산출물에만 병합한다.
+PALETTE_LOCAL = ROOT / "hammerspoon" / "special_chars_palette.local.html"
 LOCAL_SRC = ROOT / "entries.local.json"
-local_entries = []
-if LOCAL_SRC.exists():
-    local_entries = json.loads(LOCAL_SRC.read_text(encoding="utf-8"))
-    bad_l = [e for e in local_entries
-             if not e["shortcut"].startswith("ㅁ") or not e["phrase"]]
-    if bad_l:
-        sys.exit(f"FATAL: 로컬 형식 오류 {bad_l}")
-    clash = {e["shortcut"] for e in local_entries} & set(shortcuts)
-    if clash:
-        sys.exit(f"FATAL: 로컬 단축어가 공개 항목과 충돌 {clash}")
-    l_dups = [e["shortcut"] for e in local_entries]
-    l_dup = {x for x in l_dups if l_dups.count(x) > 1}
-    if l_dup:
-        sys.exit(f"FATAL: 로컬 단축어 중복 {l_dup}")
-    print(f"로컬: {len(local_entries)}개 항목 (공개 산출물에는 제외)")
-
-all_entries = sorted(entries + local_entries,
-                     key=lambda e: (order.get(e["category"], 9), e["priority"]))
-
-DEST.mkdir(exist_ok=True)
-
-# --- 1. plist ---
-plist_data = [{"phrase": e["phrase"], "shortcut": e["shortcut"]} for e in entries]
-with open(DEST / "특수문자_텍스트대치.plist", "wb") as f:
-    plistlib.dump(plist_data, f)
-
 LOCAL_PLIST = DEST / "특수문자_텍스트대치.local.plist"
-if local_entries:
-    with open(LOCAL_PLIST, "wb") as f:
-        plistlib.dump([{"phrase": e["phrase"], "shortcut": e["shortcut"]}
-                       for e in all_entries], f)
-elif LOCAL_PLIST.exists():
-    LOCAL_PLIST.unlink()
 
-# --- 2. entries.json ---
-(DEST / "entries.json").write_text(
-    json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+ARGS = set(sys.argv[1:])
+CHECK = "--check" in ARGS
+WATCH = "--watch" in ARGS
+QUIET = "--quiet" in ARGS
 
-# --- 3a. 팔레트 HTML (버튼 그리드) ---
+VERSION = "1.1.0"
+
+# 카테고리: personal을 맨 앞에 둬서 팔레트에서 「최근」 바로 다음에 오게 한다. (#45)
+CATS = ["personal", "hanja-classic", "work-units", "punct-modern", "combo"]
+CAT_META = {
+    "personal": ("개인 — 로컬 전용", "--c4"),
+    "hanja-classic": ("한자키 클래식", "--c1"),
+    "work-units": ("업무 · 단위 · 번호", "--c2"),
+    "punct-modern": ("괄호 · 문장부호 · 맥 키", "--c3"),
+    "combo": ("조합", "--c4"),
+}
+ORDER = {c: i for i, c in enumerate(CATS)}
+REQUIRED = ("shortcut", "phrase", "ko_name", "priority", "category")
+
+problems = []
+warnings = []
+
+
+def say(*a):
+    if not QUIET:
+        print(*a)
+
+
+def fail(msg):
+    problems.append(msg)
+
+
+def warn(msg):
+    warnings.append(msg)
+
+
+def load_json(path, what):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        fail(f"{what} 없음: {path}")
+    except json.JSONDecodeError as e:
+        fail(f"{what} JSON 오류: {e}")
+    return None
+
+
+# ---------------------------------------------------------------- 설정 (#3)
+def load_config():
+    """config.json(공개 기본값) + config.local.json(개인 재정의)를 병합."""
+    base = load_json(ROOT / "config.json", "config.json") or {}
+    local_path = ROOT / "config.local.json"
+    if local_path.exists():
+        over = load_json(local_path, "config.local.json") or {}
+        for k, v in over.items():
+            if isinstance(v, dict) and isinstance(base.get(k), dict):
+                base[k].update(v)
+            else:
+                base[k] = v
+    return base
+
+
+# ---------------------------------------------------------------- 검증 (#8,9,10)
+BAD_CHARS = set(' \t\n"\'\\')
+
+
+def validate(entries, label, known_shortcuts=()):
+    """스키마·형식·중복 검증. 문제는 problems/warnings에 쌓는다."""
+    seen = {}
+    for i, e in enumerate(entries):
+        where = f"{label}[{i}]"
+        if not isinstance(e, dict):
+            fail(f"{where}: 객체가 아님")
+            continue
+        missing = [k for k in REQUIRED if k not in e]
+        if missing:
+            fail(f"{where}: 필수 키 누락 {missing}")
+            continue
+        sc, ph, nm = e["shortcut"], e["phrase"], e["ko_name"]
+        if not isinstance(sc, str) or not isinstance(ph, str) or not isinstance(nm, str):
+            fail(f"{where}: shortcut/phrase/ko_name 은 문자열이어야 함")
+            continue
+        if not isinstance(e["priority"], int):
+            fail(f"{where} {sc}: priority 는 정수여야 함")
+        if not sc.startswith("ㅁ"):
+            fail(f"{where} {sc}: 단축어는 'ㅁ' 로 시작해야 함")
+        if len(sc) < 2:
+            fail(f"{where} {sc}: 단축어가 너무 짧음")
+        if BAD_CHARS & set(sc):
+            fail(f"{where} {sc}: 단축어에 공백·따옴표·역슬래시 금지")
+        if not ph:
+            fail(f"{where} {sc}: phrase 가 비어 있음")
+        if not nm:
+            warn(f"{where} {sc}: ko_name 이 비어 있음")
+        if e["category"] not in ORDER:
+            fail(f"{where} {sc}: 알 수 없는 카테고리 '{e['category']}' (가능: {', '.join(CATS)})")
+        if "aliases" in e and not (isinstance(e["aliases"], list)
+                                  and all(isinstance(x, str) for x in e["aliases"])):
+            fail(f"{where} {sc}: aliases 는 문자열 배열이어야 함")
+        if sc in seen:
+            fail(f"{label}: 단축어 중복 '{sc}' ({seen[sc]}, {i}번)")
+        else:
+            seen[sc] = i
+        if sc in known_shortcuts:
+            fail(f"{label}: '{sc}' 가 공개 항목과 충돌")
+    # 같은 기호에 단축어가 여럿 (#7) — 의도적일 수 있으므로 경고
+    by_phrase = {}
+    for e in entries:
+        if isinstance(e, dict) and isinstance(e.get("phrase"), str):
+            by_phrase.setdefault(e["phrase"], []).append(e["shortcut"])
+    for ph, scs in by_phrase.items():
+        if len(scs) > 1:
+            warn(f"{label}: 같은 기호 '{ph}' 에 단축어 {len(scs)}개 — {', '.join(scs)}")
+    return entries
+
+
+# ---------------------------------------------------------------- 초성·이스케이프
 CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"
+
+
 def cho(s):
     out = []
     for ch in s:
@@ -73,409 +147,211 @@ def cho(s):
         out.append(CHO[(o - 0xAC00) // 588] if 0xAC00 <= o <= 0xD7A3 else ch)
     return "".join(out)
 
-cat_meta = {
-    "hanja-classic": ("한자키 클래식", "--c1"),
-    "work-units": ("업무 · 단위 · 번호", "--c2"),
-    "punct-modern": ("괄호 · 문장부호 · 맥 키", "--c3"),
-    "combo": ("조합", "--c4"),
-    "personal": ("개인 — 로컬 전용", "--c4"),
-}
+
 def att(s):
     return htmlmod.escape(str(s), quote=True)
 
+
+def codepoints(phrase):
+    """검색용 유니코드 코드포인트 문자열. (#22)"""
+    return " ".join("U+%04X" % ord(c) for c in phrase)
+
+
 def build_sections(entry_list):
-    sections_html = []
-    for c in cats:
+    out = []
+    for c in CATS:
         rows = [e for e in entry_list if e["category"] == c]
         if not rows:
             continue
-        title, color = cat_meta[c]
+        title, color = CAT_META[c]
         btns = []
         for e in rows:
             long_cls = " long" if len(e["phrase"]) > 2 else ""
+            aliases = " ".join(e.get("aliases", []))
             btns.append(
-                f'<button class="g{long_cls}" data-c="{att(e["phrase"])}" data-n="{att(e["ko_name"])}" '
+                f'<button class="g{long_cls}" role="gridcell" '
+                f'data-c="{att(e["phrase"])}" data-n="{att(e["ko_name"])}" '
                 f'data-s="{att(e["shortcut"])}" data-cho="{att(cho(e["ko_name"]))}" '
-                f'title="{att(e["ko_name"])} · {att(e["shortcut"])} + 스페이스">{att(e["phrase"])}</button>')
-        sections_html.append(
-            f'<div class="sec"><div class="lbl"><span class="dot" style="background:var({color})"></span>{att(title)}</div>'
-            f'<div class="row">{"".join(btns)}</div></div>')
-    return "".join(sections_html)
+                f'data-a="{att(aliases)}" data-u="{att(codepoints(e["phrase"]))}" '
+                f'data-cat="{att(c)}" '
+                f'aria-label="{att(e["ko_name"])} {att(e["shortcut"])}" '
+                f'title="{att(e["ko_name"])} · {att(e["shortcut"])} + 스페이스">'
+                f'<span class="gc">{att(e["phrase"])}</span>'
+                f'<span class="gs">{att(e["shortcut"][1:])}</span>'
+                f'</button>')
+        out.append(
+            f'<div class="sec" data-cat="{att(c)}">'
+            f'<div class="lbl" role="button" tabindex="-1" aria-expanded="true">'
+            f'<span class="dot" style="background:var({color})"></span>'
+            f'<span class="lbl-t">{att(title)}</span>'
+            f'<span class="lbl-n">{len(rows)}</span></div>'
+            f'<div class="row" role="row">{"".join(btns)}</div></div>')
+    return "".join(out)
 
-SECTIONS = build_sections(entries)
 
-palette_html = """<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><style>
-:root {
-  --bg: #FFFFFF; --ink: #191F28; --sub: #6B7684; --card: #F2F4F6;
-  --line: #E5E8EB; --accent: #3182F6; --seal: #3182F6; --chip: #E8F3FF;
-  --c1: #FE9800; --c2: #3182F6; --c3: #02A262; --c4: #9161F1;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #17171C; --ink: #E7E9EC; --sub: #8B95A1; --card: #26262E;
-    --line: #32323B; --accent: #4593FC; --seal: #4593FC; --chip: #1B3050;
-    --c1: #FFA938; --c2: #4593FC; --c3: #3AC08E; --c4: #A97DF5;
-  }
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; background: transparent; }
-body { font-family: "Apple SD Gothic Neo", -apple-system, sans-serif; color: var(--ink); }
-.panel {
-  background: var(--bg); border: none; border-radius: 18px;
-  margin: 14px; padding: 13px 16px 10px;
-  max-height: calc(100% - 28px); overflow-y: auto;
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
-}
-.top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.panel::-webkit-scrollbar { width: 10px; }
-.panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; border: 3px solid var(--bg); }
-.panel::-webkit-scrollbar-track { background: transparent; }
-.stamp {
-  width: 30px; height: 30px; flex: none; display: inline-flex;
-  align-items: center; justify-content: center;
-  border: none; color: var(--seal); border-radius: 9px;
-  font-size: 16px; font-weight: 800;
-  background: color-mix(in srgb, var(--seal) 12%, transparent);
-}
-#q {
-  flex: 1; font: inherit; font-size: 14px; color: var(--ink);
-  background: var(--card); border: none;
-  border-radius: 10px; padding: 8px 13px; outline: none; min-width: 120px;
-}
-#q:focus { box-shadow: 0 0 0 2px var(--accent) inset; }
-.hint { font-size: 11px; color: var(--sub); white-space: nowrap; }
-#x {
-  border: none; background: var(--card); color: var(--sub);
-  width: 26px; height: 26px; border-radius: 99px; cursor: pointer;
-  font-size: 12px; font-weight: 700; flex: none;
-}
-.lbl {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 700; color: var(--sub);
-  margin: 13px 0 7px; letter-spacing: 0.02em;
-}
-.lbl .dot { width: 7px; height: 7px; border-radius: 99px; }
-.row { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 5px; }
-button.g {
-  font-family: "Apple SD Gothic Neo", "Apple Symbols", sans-serif;
-  width: 100%; min-width: 0; height: 44px; font-size: 21px; line-height: 1;
-  color: var(--ink); background: var(--card);
-  border: none; border-radius: 10px; cursor: pointer;
-  padding: 0 6px;
-  transition: transform 0.1s ease, background 0.1s ease;
-}
-button.g:hover { background: var(--chip); }
-button.g:active { transform: scale(0.94); }
-button.g:focus-visible { outline: 2px solid var(--accent); }
-button.g.long { font-size: 12px; letter-spacing: 1px; padding: 0 10px; grid-column: span 3; }
-.status {
-  margin-top: 11px; padding-top: 8px; border-top: 1px solid var(--line);
-  font-size: 12px; color: var(--sub); min-height: 18px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.status b { color: var(--ink); }
-.sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 2; }
-button.g.sel { background: var(--chip); }
-</style></head>
-<body>
-<div class="panel">
-  <div class="top">
-    <span class="stamp">ㅁ</span>
-    <input id="q" placeholder="검색: 별, 초성(ㅂㅈ), ㅁ참고…" autocomplete="off" spellcheck="false">
-    <span class="hint">←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · Esc 닫기</span>
-    <button id="x" title="닫기 (Esc)">✕</button>
-  </div>
-  <div class="sec" id="recent-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--sub)"></span>최근</div>
-    <div class="row" id="recent-row"></div>
-  </div>
-  @@SECTIONS@@
-  <div class="status" id="status">기호를 누르면 커서 위치에 바로 입력돼요 · ⌘클릭은 복사만 해요</div>
-</div>
-<script>
-"use strict";
-function post(m) {
-  try { window.webkit.messageHandlers.palette.postMessage(m); } catch (e) {}
-}
-function pick(b, cmd) { post({ action: "pick", char: b.dataset.c, cmd: !!cmd }); }
-document.addEventListener("click", ev => {
-  const b = ev.target.closest("button.g");
-  if (b) { pick(b, ev.metaKey); return; }
-  if (ev.target.closest("#x")) post({ action: "close" });
-});
-const statusEl = document.getElementById("status");
-document.addEventListener("mouseover", ev => {
-  const b = ev.target.closest("button.g");
-  if (b) statusEl.innerHTML = "<b>" + b.dataset.c + "</b>  " + b.dataset.n + "  ·  " + b.dataset.s + " + 스페이스";
-});
-const q = document.getElementById("q");
-function visibleButtons() {
-  return [...document.querySelectorAll(".sec:not([hidden]) button.g")].filter(b => b.style.display !== "none");
-}
-function filter() {
-  const raw = q.value.trim().toLowerCase();
-  const tokens = raw ? raw.split(/\\s+/) : [];
-  document.querySelectorAll("button.g").forEach(b => {
-    const k = (b.dataset.c + " " + b.dataset.n + " " + b.dataset.s).toLowerCase();
-    const hit = !tokens.length || tokens.every(t =>
-      k.includes(t) || (/^[ㄱ-ㅎ]+$/.test(t) && b.dataset.cho.includes(t)));
-    b.style.display = hit ? "" : "none";
-  });
-  document.querySelectorAll(".sec").forEach(sec => {
-    if (sec.id === "recent-sec" && sec.hidden) return;
-    const any = [...sec.querySelectorAll("button.g")].some(b => b.style.display !== "none");
-    sec.style.display = any ? "" : "none";
-  });
-  refreshSel();
-}
-q.addEventListener("input", filter);
-// ---- 키보드 커서: 파란 테두리로 현재 위치, 방향키 이동, Enter 입력 ----
-let sel = null;
-function focusables() {
-  return [...document.querySelectorAll(".sec:not([hidden]) button.g")]
-    .filter(el => el.offsetParent !== null && el.style.display !== "none");
-}
-function setSel(el) {
-  if (sel && sel !== el) sel.classList.remove("sel");
-  sel = el || null;
-  if (sel) { sel.classList.add("sel"); sel.scrollIntoView({ block: "nearest" }); }
-}
-function refreshSel() {
-  const items = focusables();
-  if (!items.length) { if (sel) { sel.classList.remove("sel"); sel = null; } return; }
-  if (!sel || !items.includes(sel)) setSel(items[0]);
-}
-function colsOf(el) {
-  const grid = el.parentElement;
-  if (!grid) return 1;
-  const kids = [...grid.children].filter(c => c.offsetParent !== null && c.style.display !== "none");
-  if (!kids.length) return 1;
-  const top0 = kids[0].offsetTop; let n = 0;
-  for (const k of kids) { if (k.offsetTop === top0) n++; else break; }
-  return Math.max(1, n);
-}
-function navSel(dir) {
-  const items = focusables();
-  if (!items.length) return;
-  let i = sel ? items.indexOf(sel) : -1;
-  if (i < 0) { setSel(items[0]); return; }
-  let ni = i;
-  if (dir === "right") ni = i + 1;
-  else if (dir === "left") ni = i - 1;
-  else if (dir === "down") ni = i + colsOf(items[i]);
-  else if (dir === "up") ni = i - colsOf(items[i]);
-  if (ni < 0) ni = 0;
-  if (ni >= items.length) ni = items.length - 1;
-  setSel(items[ni]);
-}
-function activate(el, cmd) {
-  if (!el) return;
-  if (el.matches("button.g")) pick(el, cmd);
-  else el.click();
-}
-document.addEventListener("keydown", ev => {
-  if (ev.isComposing || ev.keyCode === 229) return;
-  if (ev.key === "Escape") { ev.preventDefault(); post({ action: "close" }); return; }
-  if (ev.key === "Enter") { ev.preventDefault(); activate(sel || focusables()[0], ev.metaKey); return; }
-  if (ev.key === "ArrowRight") { ev.preventDefault(); navSel("right"); return; }
-  if (ev.key === "ArrowLeft") { ev.preventDefault(); navSel("left"); return; }
-  if (ev.key === "ArrowDown") { ev.preventDefault(); navSel("down"); return; }
-  if (ev.key === "ArrowUp") { ev.preventDefault(); navSel("up"); return; }
-});
-window.setRecent = function (chars) {
-  const sec = document.getElementById("recent-sec");
-  const row = document.getElementById("recent-row");
-  row.innerHTML = "";
-  const seen = new Set();
-  (chars || []).slice(0, 10).forEach(ch => {
-    if (seen.has(ch)) return;
-    seen.add(ch);
-    const src = [...document.querySelectorAll(".sec:not(#recent-sec) button.g")].find(b => b.dataset.c === ch);
-    if (src) row.appendChild(src.cloneNode(true));
-  });
-  sec.hidden = row.children.length === 0;
-  refreshSel();
-};
-window.resetAndFocus = function () {
-  q.value = "";
-  filter();
-  q.focus();
-};
-</script>
-</body></html>
-"""
-PALETTE.write_text(palette_html.replace("@@SECTIONS@@", SECTIONS), encoding="utf-8")
-PALETTE_LOCAL = ROOT / "hammerspoon" / "special_chars_palette.local.html"
-if local_entries:
-    PALETTE_LOCAL.write_text(
-        palette_html.replace("@@SECTIONS@@", build_sections(all_entries)), encoding="utf-8")
-elif PALETTE_LOCAL.exists():
-    PALETTE_LOCAL.unlink()
+# ---------------------------------------------------------------- 변경 요약 (#6)
+def summarize_changes(old, new):
+    if old is None:
+        return None
+    o = {e["shortcut"]: e for e in old if isinstance(e, dict) and "shortcut" in e}
+    n = {e["shortcut"]: e for e in new}
+    added = [k for k in n if k not in o]
+    removed = [k for k in o if k not in n]
+    changed = [k for k in n if k in o and n[k] != o[k]]
+    if not (added or removed or changed):
+        return "변경 없음"
+    bits = []
+    if added:
+        bits.append(f"추가 {len(added)} ({', '.join(sorted(added)[:5])}{'…' if len(added) > 5 else ''})")
+    if removed:
+        bits.append(f"삭제 {len(removed)} ({', '.join(sorted(removed)[:5])}{'…' if len(removed) > 5 else ''})")
+    if changed:
+        bits.append(f"수정 {len(changed)} ({', '.join(sorted(changed)[:5])}{'…' if len(changed) > 5 else ''})")
+    return " · ".join(bits)
 
-# --- 3b. Hammerspoon Lua (v4: webview 버튼 그리드) ---
-lua_template = r"""-- ============================================================
--- 특수문자 팔레트 v5  (⌥ + Space) — 버튼 그리드 + 키보드 커서
--- 기호가 한 화면에 버튼으로 깔림. 클릭 = 커서 위치에 입력 + 복사
---   ⌘클릭(또는 검색 후 ⌘Enter) = 복사만
---   검색: 이름 · 단축어 · 초성(ㅂㅈ→별점) / Esc = 닫기
--- 단축키 변경: 아래 hs.hotkey.bind의 {"alt"}, "space" 부분 수정
--- UI 수정: special_chars_palette.html (재빌드 시 덮어써짐)
--- ============================================================
 
-local CHAR_COUNT = 0  -- loadHtml에서 실제 버튼 수로 채워진다
--- 로컬 전용 팔레트(.local.html)가 설치돼 있으면 그쪽을 우선 사용한다.
--- 개인 항목은 공개 저장소의 special_chars_palette.html에는 들어가지 않는다.
-local function paletteFile()
-  local localFile = hs.configdir .. "/special_chars_palette.local.html"
-  local f = io.open(localFile, "r")
-  if f then f:close(); return localFile end
-  return hs.configdir .. "/special_chars_palette.html"
-end
-local PALETTE_FILE = paletteFile()
+# ---------------------------------------------------------------- 빌드 본체
+def build():
+    problems.clear()
+    warnings.clear()
 
-local RECENT_KEY = "specialchars.recent"
-local COUNT_KEY = "specialchars.counts"
-local function remember(ch)
-  local out = { ch }
-  for _, v in ipairs(hs.settings.get(RECENT_KEY) or {}) do
-    if v ~= ch and #out < 10 then out[#out + 1] = v end
-  end
-  hs.settings.set(RECENT_KEY, out)
-  local counts = hs.settings.get(COUNT_KEY) or {}
-  counts[ch] = (counts[ch] or 0) + 1
-  hs.settings.set(COUNT_KEY, counts)
-end
+    cfg = load_config()
+    entries = load_json(ROOT / "entries.json", "entries.json")
+    if entries is None:
+        return report(None)
+    old_entries = list(entries)
 
-local function loadHtml()
-  PALETTE_FILE = paletteFile()
-  local f = io.open(PALETTE_FILE, "r")
-  if not f then
-    hs.alert.show("special_chars_palette.html 없음 — 재빌드 필요")
-    return "<html><body>palette missing</body></html>"
-  end
-  local s = f:read("*a")
-  f:close()
-  local _, n = s:gsub('class="g', '')
-  CHAR_COUNT = n
-  return s
-end
+    validate(entries, "entries.json")
+    public_shortcuts = {e["shortcut"] for e in entries
+                        if isinstance(e, dict) and isinstance(e.get("shortcut"), str)}
 
-local wv = nil
-local shown = false
-local prevWin = nil
+    local_entries = []
+    if LOCAL_SRC.exists():
+        local_entries = load_json(LOCAL_SRC, "entries.local.json") or []
+        validate(local_entries, "entries.local.json", public_shortcuts)
 
-local function paletteRect()
-  local scr = hs.screen.mainScreen():frame()
-  local w = math.min(760, scr.w * 0.72)
-  local h = math.min(660, scr.h * 0.85)
-  return { x = scr.x + (scr.w - w) / 2, y = scr.y + (scr.h - h) / 2.3, w = w, h = h }
-end
+    if problems:
+        return report(None)
 
--- Esc는 웹뷰 JS에 맡기지 않고 네이티브 핫키로 잡는다.
--- 한글 IME가 켜져 있으면 검색창의 Esc를 IME가 조합 취소로 먼저 먹어서
--- webview의 keydown 핸들러까지 도달하지 못한다. (팔레트는 열릴 때 검색창에 포커스)
-local escHotkey
-local focusChecker
+    entries.sort(key=lambda e: (ORDER[e["category"]], e["priority"], e["shortcut"]))
+    all_entries = sorted(entries + local_entries,
+                         key=lambda e: (ORDER[e["category"]], e["priority"], e["shortcut"]))
 
-local function hidePalette(refocus)
-  if escHotkey then escHotkey:disable() end
-  if focusChecker then focusChecker:stop(); focusChecker = nil end
-  if wv and shown then
-    wv:hide()
-    shown = false
-  end
-  if refocus and prevWin then prevWin:focus() end
-end
+    change = summarize_changes(old_entries, entries)
 
-escHotkey = hs.hotkey.new({}, "escape", function() hidePalette(true) end)
+    if CHECK:
+        return report({"공개": len(entries), "로컬": len(local_entries), "변경": change}, wrote=False)
 
-local uc = hs.webview.usercontent.new("palette")
-uc:setCallback(function(msg)
-  local b = msg.body or {}
-  if b.action == "pick" and type(b.char) == "string" and #b.char > 0 then
-    remember(b.char)
-    hs.pasteboard.setContents(b.char)
-    if b.cmd then
-      hidePalette(true)
-      hs.alert.show(b.char .. "  복사됨 (입력 안 함)", 0.7)
-      return
-    end
-    hidePalette(false)
-    if prevWin then prevWin:focus() end
-    hs.timer.doAfter(0.15, function()
-      hs.eventtap.keyStrokes(b.char)
-    end)
-  elseif b.action == "close" then
-    hidePalette(true)
-  end
-end)
+    cfg_json = json.dumps(cfg, ensure_ascii=False)
 
-local function buildWebview()
-  wv = hs.webview.new(paletteRect(), {}, uc)
-  wv:windowStyle({ "borderless" })
-  wv:allowTextEntry(true)
-  wv:transparent(true)
-  wv:shadow(false)
-  wv:level(hs.drawing.windowLevels.floating)
-  wv:behavior(hs.drawing.windowBehaviors.canJoinAllSpaces)
-  wv:html(loadHtml())
-end
-buildWebview()
+    # 1. plist (#75,76,82)
+    def dump_plist(path, rows):
+        with open(path, "wb") as f:
+            plistlib.dump([{"phrase": e["phrase"], "shortcut": e["shortcut"]} for e in rows], f)
 
-local function showPalette()
-  prevWin = hs.window.frontmostWindow()
-  wv:frame(paletteRect())
-  local rec = hs.settings.get(RECENT_KEY) or {}
-  wv:evaluateJavaScript("window.setRecent && setRecent(" .. hs.json.encode(rec) .. ")")
-  wv:show()
-  shown = true
-  escHotkey:enable()
-  -- 팔레트는 borderless floating이라 포커스를 잃어도 떠 있는다.
-  -- 그 상태로 두면 Esc 핫키가 다른 앱의 Esc까지 가로채므로, 포커스가 떠나면 닫는다.
-  if focusChecker then focusChecker:stop() end
-  focusChecker = hs.timer.doEvery(0.4, function()
-    if not shown then return end
-    local pw = wv and wv:hswindow()
-    local fw = hs.window.focusedWindow()
-    if pw and fw and fw:id() ~= pw:id() then hidePalette(false) end
-  end)
-  hs.timer.doAfter(0.08, function()
-    local win = wv:hswindow()
-    if win then win:focus() end
-    wv:evaluateJavaScript("window.resetAndFocus && resetAndFocus()")
-  end)
-end
+    dump_plist(DEST / "특수문자_텍스트대치.plist", entries)
+    if local_entries:
+        dump_plist(LOCAL_PLIST, all_entries)
+        warn("텍스트 대치에는 .local.plist 하나만 등록하세요. "
+             "공개 plist와 둘 다 등록하면 항목이 중복됩니다.")
+    elif LOCAL_PLIST.exists():
+        LOCAL_PLIST.unlink()
 
-hs.hotkey.bind({ "alt" }, "space", function()
-  if shown then hidePalette(true) else showPalette() end
-end)
+    # 2. entries.json 정규화 재기록
+    (DEST / "entries.json").write_text(
+        json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
--- 터미널 검증용:
---   hs -c "SpecialChars.probe()" && sleep 1 && hs -c "print(hs.settings.get('specialchars.probe'))"
-SpecialChars = {
-  count = function() return CHAR_COUNT end,
-  version = 5,
-  show = showPalette,
-  hide = function() hidePalette(true) end,
-  probe = function()
-    wv:evaluateJavaScript("document.querySelectorAll('button.g').length", function(res)
-      hs.settings.set("specialchars.probe", res)
-    end)
-  end,
-}
-"""
-HS.parent.mkdir(exist_ok=True)
-HS.write_text(lua_template, encoding="utf-8")
+    # 3. 팔레트 html
+    tpl = (ROOT / "template" / "palette_template.html").read_text(encoding="utf-8")
 
-# --- 5. 치트시트 HTML ---
-tpl = (ROOT / "template" / "cheatsheet_template.html").read_text(encoding="utf-8")
-html_out = tpl.replace("__DATA__", json.dumps(entries, ensure_ascii=False))
-(DEST / "index.html").write_text(html_out, encoding="utf-8")
-(DEST / "치트시트.html").write_text(html_out, encoding="utf-8")
+    def render(rows):
+        return (tpl.replace("@@SECTIONS@@", build_sections(rows))
+                   .replace("@@CONFIG@@", cfg_json)
+                   .replace("@@VERSION@@", VERSION))
 
-print("생성 완료:")
-for p in sorted(DEST.iterdir()):
-    print(f"  {p.name} ({p.stat().st_size:,} bytes)")
-for p in (HS, PALETTE):
-    print(f"  {p} ({p.stat().st_size:,} bytes)")
+    PALETTE.write_text(render(entries), encoding="utf-8")
+    if local_entries:
+        PALETTE_LOCAL.write_text(render(all_entries), encoding="utf-8")
+    elif PALETTE_LOCAL.exists():
+        PALETTE_LOCAL.unlink()
+
+    # 4. lua
+    lua = (ROOT / "template" / "special_chars_template.lua").read_text(encoding="utf-8")
+    HS.parent.mkdir(exist_ok=True)
+    HS.write_text(lua.replace("@@CONFIG@@", cfg_json).replace("@@VERSION@@", VERSION),
+                  encoding="utf-8")
+
+    # 5. 치트시트
+    sheet = (ROOT / "template" / "cheatsheet_template.html").read_text(encoding="utf-8")
+    html_out = (sheet.replace("__DATA__", json.dumps(entries, ensure_ascii=False))
+                     .replace("@@VERSION@@", VERSION))
+    (DEST / "index.html").write_text(html_out, encoding="utf-8")
+    (DEST / "치트시트.html").write_text(html_out, encoding="utf-8")
+
+    return report({"공개": len(entries), "로컬": len(local_entries), "변경": change})
+
+
+# ---------------------------------------------------------------- 출력 (#11,14)
+OUTPUTS = ["entries.json", "특수문자_텍스트대치.plist", "특수문자_텍스트대치.local.plist",
+           "index.html", "치트시트.html",
+           "hammerspoon/special_chars.lua",
+           "hammerspoon/special_chars_palette.html",
+           "hammerspoon/special_chars_palette.local.html"]
+
+
+def report(stats, wrote=True):
+    for w in warnings:
+        say(f"  경고: {w}")
+    if problems:
+        for p in problems:
+            print(f"  오류: {p}", file=sys.stderr)
+        print(f"실패: 오류 {len(problems)}건", file=sys.stderr)
+        return 1
+    if stats:
+        line = f"OK: 공개 {stats['공개']}개"
+        if stats["로컬"]:
+            line += f" + 로컬 {stats['로컬']}개 (공개 산출물에는 제외)"
+        if stats.get("변경"):
+            line += f" · {stats['변경']}"
+        say(line)
+    if wrote:
+        say("생성:")
+        for rel in OUTPUTS:                      # 결정론적 순서 (#14)
+            p = ROOT / rel
+            if p.exists():
+                say(f"  {rel} ({p.stat().st_size:,} bytes)")
+    else:
+        say("검증만 수행 (파일 안 씀)")
+    return 0
+
+
+# ---------------------------------------------------------------- watch (#5)
+WATCH_FILES = ["entries.json", "entries.local.json", "config.json", "config.local.json",
+               "template/palette_template.html", "template/special_chars_template.lua",
+               "template/cheatsheet_template.html"]
+
+
+def stamps():
+    out = {}
+    for rel in WATCH_FILES:
+        p = ROOT / rel
+        out[rel] = p.stat().st_mtime if p.exists() else None
+    return out
+
+
+if __name__ == "__main__":
+    code = build()
+    if WATCH:
+        print("watch 중 — 종료는 Ctrl+C")
+        last = stamps()
+        try:
+            while True:
+                time.sleep(0.7)
+                cur = stamps()
+                if cur != last:
+                    last = cur
+                    print(f"\n[{time.strftime('%H:%M:%S')}] 변경 감지 — 재빌드")
+                    build()
+        except KeyboardInterrupt:
+            print("\nwatch 종료")
+    sys.exit(code)

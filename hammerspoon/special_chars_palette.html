@@ -3,15 +3,34 @@
 :root {
   --bg: #FFFFFF; --ink: #191F28; --sub: #6B7684; --card: #F2F4F6;
   --line: #E5E8EB; --accent: #3182F6; --seal: #3182F6; --chip: #E8F3FF;
+  --warn: #E03131;
   --c1: #FE9800; --c2: #3182F6; --c3: #02A262; --c4: #9161F1;
+  --btn-h: 44px; --btn-f: 21px; --col: 46px;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #17171C; --ink: #E7E9EC; --sub: #8B95A1; --card: #26262E;
     --line: #32323B; --accent: #4593FC; --seal: #4593FC; --chip: #1B3050;
+    --warn: #FF8787;
     --c1: #FFA938; --c2: #4593FC; --c3: #3AC08E; --c4: #A97DF5;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #17171C; --ink: #E7E9EC; --sub: #8B95A1; --card: #26262E;
+  --line: #32323B; --accent: #4593FC; --seal: #4593FC; --chip: #1B3050;
+  --warn: #FF8787;
+  --c1: #FFA938; --c2: #4593FC; --c3: #3AC08E; --c4: #A97DF5;
+}
+/* 고대비 (#56) */
+:root[data-contrast="high"] {
+  --card: transparent; --line: var(--ink); --sub: var(--ink);
+}
+:root[data-contrast="high"] button.g { border: 1.5px solid var(--line); }
+:root[data-contrast="high"] button.g.sel { box-shadow: 0 0 0 3px var(--accent); }
+/* 폰트 크기 3단계 (#55) */
+:root[data-size="s"] { --btn-h: 38px; --btn-f: 18px; --col: 40px; }
+:root[data-size="l"] { --btn-h: 52px; --btn-f: 25px; --col: 56px; }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; background: transparent; }
 body { font-family: "Apple SD Gothic Neo", -apple-system, sans-serif; color: var(--ink); }
@@ -32,113 +51,444 @@ body { font-family: "Apple SD Gothic Neo", -apple-system, sans-serif; color: var
   font-size: 16px; font-weight: 800;
   background: color-mix(in srgb, var(--seal) 12%, transparent);
 }
+.qwrap { flex: 1; position: relative; display: flex; min-width: 120px; }
 #q {
   flex: 1; font: inherit; font-size: 14px; color: var(--ink);
   background: var(--card); border: none;
-  border-radius: 10px; padding: 8px 13px; outline: none; min-width: 120px;
+  border-radius: 10px; padding: 8px 30px 8px 13px; outline: none; min-width: 0;
 }
 #q:focus { box-shadow: 0 0 0 2px var(--accent) inset; }
-.hint { font-size: 11px; color: var(--sub); white-space: nowrap; }
-#x {
-  border: none; background: var(--card); color: var(--sub);
-  width: 26px; height: 26px; border-radius: 99px; cursor: pointer;
-  font-size: 12px; font-weight: 700; flex: none;
+/* 검색어 지우기 (#25) */
+#qx {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  border: none; background: transparent; color: var(--sub);
+  width: 20px; height: 20px; border-radius: 99px; cursor: pointer;
+  font-size: 11px; line-height: 1; display: none;
 }
+#qx:hover { background: var(--line); }
+#q:not(:placeholder-shown) ~ #qx { display: block; }
+.hint { font-size: 11px; color: var(--sub); white-space: nowrap; }
+.tools { display: flex; gap: 4px; flex: none; }
+.tools button, #x {
+  border: none; background: var(--card); color: var(--sub);
+  height: 26px; min-width: 26px; padding: 0 7px; border-radius: 99px; cursor: pointer;
+  font-size: 11px; font-weight: 700; flex: none;
+}
+.tools button:hover, #x:hover { background: var(--chip); color: var(--ink); }
 .lbl {
   display: flex; align-items: center; gap: 6px;
   font-size: 11px; font-weight: 700; color: var(--sub);
-  margin: 13px 0 7px; letter-spacing: 0.02em;
+  margin: 13px 0 7px; letter-spacing: 0.02em; cursor: pointer;
+  user-select: none;
 }
-.lbl .dot { width: 7px; height: 7px; border-radius: 99px; }
-.row { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 5px; }
+.lbl:hover { color: var(--ink); }
+.lbl .dot { width: 7px; height: 7px; border-radius: 99px; flex: none; }
+.lbl-n {
+  font-weight: 600; font-size: 10px; color: var(--sub);
+  background: var(--card); border-radius: 99px; padding: 1px 6px;
+}
+.lbl::after { content: "▾"; font-size: 9px; margin-left: auto; opacity: 0.5; }
+.sec[data-collapsed="1"] .lbl::after { content: "▸"; }
+.sec[data-collapsed="1"] .row { display: none; }
+.row { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--col), 1fr)); gap: 5px; }
 button.g {
   font-family: "Apple SD Gothic Neo", "Apple Symbols", sans-serif;
-  width: 100%; min-width: 0; height: 44px; font-size: 21px; line-height: 1;
+  position: relative;
+  width: 100%; min-width: 0; height: var(--btn-h); font-size: var(--btn-f); line-height: 1;
   color: var(--ink); background: var(--card);
   border: none; border-radius: 10px; cursor: pointer;
   padding: 0 6px;
+  display: flex; align-items: center; justify-content: center;
   transition: transform 0.1s ease, background 0.1s ease;
 }
 button.g:hover { background: var(--chip); }
 button.g:active { transform: scale(0.94); }
 button.g:focus-visible { outline: 2px solid var(--accent); }
-button.g.long { font-size: 12px; letter-spacing: 1px; padding: 0 10px; grid-column: span 3; }
+button.g.long { grid-column: span 3; }
+button.g.long .gc { font-size: 12px; letter-spacing: 1px; }
+.gc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+/* 단축어 배지 (#53) */
+.gs {
+  display: none; position: absolute; right: 3px; bottom: 2px;
+  font-size: 8px; font-weight: 700; color: var(--sub); pointer-events: none;
+  max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+:root[data-badge="1"] .gs { display: block; }
+/* 즐겨찾기 (#47) */
+button.g[data-fav="1"]::before {
+  content: ""; position: absolute; left: 4px; top: 4px;
+  width: 5px; height: 5px; border-radius: 99px; background: var(--c1);
+}
 .status {
   margin-top: 11px; padding-top: 8px; border-top: 1px solid var(--line);
   font-size: 12px; color: var(--sub); min-height: 18px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .status b { color: var(--ink); }
+.status mark { background: transparent; color: var(--accent); font-weight: 700; }
 .sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 2; }
 button.g.sel { background: var(--chip); }
+/* 빈 결과 (#17,29) */
+#empty { display: none; padding: 26px 4px; text-align: center; color: var(--sub); font-size: 13px; }
+#empty.on { display: block; }
+#empty .sug { margin-top: 10px; display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+#empty .sug button {
+  border: none; background: var(--card); color: var(--ink); cursor: pointer;
+  border-radius: 8px; padding: 6px 10px; font-size: 13px; font-family: inherit;
+}
+#empty .sug button:hover { background: var(--chip); }
+/* 토스트 (#52) */
+#toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(8px);
+  background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 600;
+  padding: 7px 14px; border-radius: 99px; opacity: 0; pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease; z-index: 50;
+}
+#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* 도움말 (#41) */
+#help {
+  display: none; position: fixed; inset: 14px; z-index: 60;
+  background: var(--bg); border-radius: 16px; padding: 18px 22px;
+  overflow-y: auto; box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+}
+#help.on { display: block; }
+#help h3 { margin: 0 0 12px; font-size: 14px; }
+#help table { border-collapse: collapse; font-size: 12px; width: 100%; }
+#help td { padding: 4px 10px 4px 0; vertical-align: top; }
+#help td:first-child { color: var(--sub); white-space: nowrap; font-weight: 700; }
+#help .ver { margin-top: 14px; font-size: 11px; color: var(--sub); }
+@media (prefers-reduced-motion: reduce) {          /* (#57) */
+  * { transition: none !important; animation: none !important; }
+}
 </style></head>
 <body>
-<div class="panel">
+<div class="panel" id="panel">
   <div class="top">
     <span class="stamp">ㅁ</span>
-    <input id="q" placeholder="검색: 별, 초성(ㅂㅈ), ㅁ참고…" autocomplete="off" spellcheck="false">
-    <span class="hint">←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · Esc 닫기</span>
-    <button id="x" title="닫기 (Esc)">✕</button>
+    <span class="qwrap">
+      <input id="q" placeholder="검색: 별, 초성(ㅂㅈ), star, U+2605…" autocomplete="off" spellcheck="false"
+             role="combobox" aria-controls="panel" aria-label="기호 검색">
+      <button id="qx" title="검색어 지우기 (⌘⌫)" aria-label="검색어 지우기">✕</button>
+    </span>
+    <span class="hint" id="hint">←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · ? 도움말</span>
+    <span class="tools">
+      <button id="t-size" title="글자 크기">Aa</button>
+      <button id="t-theme" title="밝게/어둡게">◐</button>
+      <button id="t-badge" title="단축어 배지 표시">ㅁ</button>
+      <button id="x" title="닫기 (Esc)">✕</button>
+    </span>
+  </div>
+  <div class="sec" id="fav-sec" hidden>
+    <div class="lbl" role="button" aria-expanded="true"><span class="dot" style="background:var(--c1)"></span><span class="lbl-t">즐겨찾기</span><span class="lbl-n" id="fav-n">0</span></div>
+    <div class="row" id="fav-row"></div>
   </div>
   <div class="sec" id="recent-sec" hidden>
-    <div class="lbl"><span class="dot" style="background:var(--sub)"></span>최근</div>
+    <div class="lbl" role="button" aria-expanded="true"><span class="dot" style="background:var(--sub)"></span><span class="lbl-t">최근</span><span class="lbl-n" id="recent-n">0</span></div>
     <div class="row" id="recent-row"></div>
   </div>
-  <div class="sec"><div class="lbl"><span class="dot" style="background:var(--c1)"></span>한자키 클래식</div><div class="row"><button class="g" data-c="※" data-n="당구장 표시(참고표)" data-s="ㅁ참고" data-cho="ㄷㄱㅈ ㅍㅅ(ㅊㄱㅍ)" title="당구장 표시(참고표) · ㅁ참고 + 스페이스">※</button><button class="g" data-c="★" data-n="검은 별표" data-s="ㅁ별" data-cho="ㄱㅇ ㅂㅍ" title="검은 별표 · ㅁ별 + 스페이스">★</button><button class="g" data-c="☆" data-n="빈 별표" data-s="ㅁ빈별" data-cho="ㅂ ㅂㅍ" title="빈 별표 · ㅁ빈별 + 스페이스">☆</button><button class="g" data-c="♥" data-n="검은 하트" data-s="ㅁ하트" data-cho="ㄱㅇ ㅎㅌ" title="검은 하트 · ㅁ하트 + 스페이스">♥</button><button class="g" data-c="♡" data-n="빈 하트" data-s="ㅁ빈하트" data-cho="ㅂ ㅎㅌ" title="빈 하트 · ㅁ빈하트 + 스페이스">♡</button><button class="g" data-c="✓" data-n="체크 표시" data-s="ㅁ체크" data-cho="ㅊㅋ ㅍㅅ" title="체크 표시 · ㅁ체크 + 스페이스">✓</button><button class="g" data-c="→" data-n="오른쪽 화살표" data-s="ㅁ오른" data-cho="ㅇㄹㅉ ㅎㅅㅍ" title="오른쪽 화살표 · ㅁ오른 + 스페이스">→</button><button class="g" data-c="●" data-n="검은 동그라미" data-s="ㅁ원" data-cho="ㄱㅇ ㄷㄱㄹㅁ" title="검은 동그라미 · ㅁ원 + 스페이스">●</button><button class="g" data-c="○" data-n="빈 동그라미" data-s="ㅁ빈원" data-cho="ㅂ ㄷㄱㄹㅁ" title="빈 동그라미 · ㅁ빈원 + 스페이스">○</button><button class="g" data-c="←" data-n="왼쪽 화살표" data-s="ㅁ왼" data-cho="ㅇㅉ ㅎㅅㅍ" title="왼쪽 화살표 · ㅁ왼 + 스페이스">←</button><button class="g" data-c="↑" data-n="위쪽 화살표" data-s="ㅁ위" data-cho="ㅇㅉ ㅎㅅㅍ" title="위쪽 화살표 · ㅁ위 + 스페이스">↑</button><button class="g" data-c="↓" data-n="아래쪽 화살표" data-s="ㅁ아래" data-cho="ㅇㄹㅉ ㅎㅅㅍ" title="아래쪽 화살표 · ㅁ아래 + 스페이스">↓</button><button class="g" data-c="↔" data-n="양쪽 화살표" data-s="ㅁ양쪽" data-cho="ㅇㅉ ㅎㅅㅍ" title="양쪽 화살표 · ㅁ양쪽 + 스페이스">↔</button><button class="g" data-c="⇒" data-n="이중 화살표" data-s="ㅁ겹우" data-cho="ㅇㅈ ㅎㅅㅍ" title="이중 화살표 · ㅁ겹우 + 스페이스">⇒</button><button class="g" data-c="■" data-n="검은 네모" data-s="ㅁ네모" data-cho="ㄱㅇ ㄴㅁ" title="검은 네모 · ㅁ네모 + 스페이스">■</button><button class="g" data-c="□" data-n="빈 네모" data-s="ㅁ빈네모" data-cho="ㅂ ㄴㅁ" title="빈 네모 · ㅁ빈네모 + 스페이스">□</button><button class="g" data-c="◎" data-n="겹 동그라미" data-s="ㅁ겹원" data-cho="ㄱ ㄷㄱㄹㅁ" title="겹 동그라미 · ㅁ겹원 + 스페이스">◎</button><button class="g" data-c="▲" data-n="검은 세모" data-s="ㅁ세모" data-cho="ㄱㅇ ㅅㅁ" title="검은 세모 · ㅁ세모 + 스페이스">▲</button><button class="g" data-c="△" data-n="빈 세모" data-s="ㅁ빈세모" data-cho="ㅂ ㅅㅁ" title="빈 세모 · ㅁ빈세모 + 스페이스">△</button><button class="g" data-c="▼" data-n="검은 역세모" data-s="ㅁ역세모" data-cho="ㄱㅇ ㅇㅅㅁ" title="검은 역세모 · ㅁ역세모 + 스페이스">▼</button><button class="g" data-c="◆" data-n="검은 마름모" data-s="ㅁ마름모" data-cho="ㄱㅇ ㅁㄹㅁ" title="검은 마름모 · ㅁ마름모 + 스페이스">◆</button><button class="g" data-c="◇" data-n="빈 마름모" data-s="ㅁ빈마름모" data-cho="ㅂ ㅁㄹㅁ" title="빈 마름모 · ㅁ빈마름모 + 스페이스">◇</button><button class="g" data-c="▶" data-n="오른쪽 검은 삼각형" data-s="ㅁ우삼각" data-cho="ㅇㄹㅉ ㄱㅇ ㅅㄱㅎ" title="오른쪽 검은 삼각형 · ㅁ우삼각 + 스페이스">▶</button><button class="g" data-c="☞" data-n="오른쪽 손가락" data-s="ㅁ우손" data-cho="ㅇㄹㅉ ㅅㄱㄹ" title="오른쪽 손가락 · ㅁ우손 + 스페이스">☞</button><button class="g" data-c="☎" data-n="전화기 기호" data-s="ㅁ전화" data-cho="ㅈㅎㄱ ㄱㅎ" title="전화기 기호 · ㅁ전화 + 스페이스">☎</button><button class="g" data-c="♪" data-n="음표(8분음표)" data-s="ㅁ음표" data-cho="ㅇㅍ(8ㅂㅇㅍ)" title="음표(8분음표) · ㅁ음표 + 스페이스">♪</button><button class="g" data-c="♬" data-n="겹음표" data-s="ㅁ겹음표" data-cho="ㄱㅇㅍ" title="겹음표 · ㅁ겹음표 + 스페이스">♬</button><button class="g" data-c="▽" data-n="빈 역세모" data-s="ㅁ빈역세모" data-cho="ㅂ ㅇㅅㅁ" title="빈 역세모 · ㅁ빈역세모 + 스페이스">▽</button><button class="g" data-c="↗" data-n="우상향 화살표" data-s="ㅁ우상" data-cho="ㅇㅅㅎ ㅎㅅㅍ" title="우상향 화살표 · ㅁ우상 + 스페이스">↗</button><button class="g" data-c="↘" data-n="우하향 화살표" data-s="ㅁ우하" data-cho="ㅇㅎㅎ ㅎㅅㅍ" title="우하향 화살표 · ㅁ우하 + 스페이스">↘</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c2)"></span>업무 · 단위 · 번호</div><div class="row"><button class="g" data-c="℃" data-n="섭씨" data-s="ㅁ섭씨" data-cho="ㅅㅆ" title="섭씨 · ㅁ섭씨 + 스페이스">℃</button><button class="g" data-c="×" data-n="곱하기표" data-s="ㅁ곱" data-cho="ㄱㅎㄱㅍ" title="곱하기표 · ㅁ곱 + 스페이스">×</button><button class="g" data-c="①" data-n="원문자 1" data-s="ㅁ1" data-cho="ㅇㅁㅈ 1" title="원문자 1 · ㅁ1 + 스페이스">①</button><button class="g" data-c="②" data-n="원문자 2" data-s="ㅁ2" data-cho="ㅇㅁㅈ 2" title="원문자 2 · ㅁ2 + 스페이스">②</button><button class="g" data-c="③" data-n="원문자 3" data-s="ㅁ3" data-cho="ㅇㅁㅈ 3" title="원문자 3 · ㅁ3 + 스페이스">③</button><button class="g" data-c="④" data-n="원문자 4" data-s="ㅁ4" data-cho="ㅇㅁㅈ 4" title="원문자 4 · ㅁ4 + 스페이스">④</button><button class="g" data-c="⑤" data-n="원문자 5" data-s="ㅁ5" data-cho="ㅇㅁㅈ 5" title="원문자 5 · ㅁ5 + 스페이스">⑤</button><button class="g" data-c="㈜" data-n="주식회사 기호" data-s="ㅁ주식" data-cho="ㅈㅅㅎㅅ ㄱㅎ" title="주식회사 기호 · ㅁ주식 + 스페이스">㈜</button><button class="g" data-c="㎡" data-n="제곱미터" data-s="ㅁ제곱미터" data-cho="ㅈㄱㅁㅌ" title="제곱미터 · ㅁ제곱미터 + 스페이스">㎡</button><button class="g" data-c="°" data-n="도(각도)" data-s="ㅁ각도" data-cho="ㄷ(ㄱㄷ)" title="도(각도) · ㅁ각도 + 스페이스">°</button><button class="g" data-c="©" data-n="저작권 기호" data-s="ㅁ저작권" data-cho="ㅈㅈㄱ ㄱㅎ" title="저작권 기호 · ㅁ저작권 + 스페이스">©</button><button class="g" data-c="±" data-n="플러스마이너스" data-s="ㅁ플마" data-cho="ㅍㄹㅅㅁㅇㄴㅅ" title="플러스마이너스 · ㅁ플마 + 스페이스">±</button><button class="g" data-c="÷" data-n="나누기표" data-s="ㅁ나누기" data-cho="ㄴㄴㄱㅍ" title="나누기표 · ㅁ나누기 + 스페이스">÷</button><button class="g" data-c="≒" data-n="약(근사)기호" data-s="ㅁ약" data-cho="ㅇ(ㄱㅅ)ㄱㅎ" title="약(근사)기호 · ㅁ약 + 스페이스">≒</button><button class="g" data-c="≠" data-n="같지않음" data-s="ㅁ다름" data-cho="ㄱㅈㅇㅇ" title="같지않음 · ㅁ다름 + 스페이스">≠</button><button class="g" data-c="≥" data-n="크거나같음" data-s="ㅁ이상" data-cho="ㅋㄱㄴㄱㅇ" title="크거나같음 · ㅁ이상 + 스페이스">≥</button><button class="g" data-c="≤" data-n="작거나같음" data-s="ㅁ이하" data-cho="ㅈㄱㄴㄱㅇ" title="작거나같음 · ㅁ이하 + 스페이스">≤</button><button class="g" data-c="²" data-n="위첨자 2" data-s="ㅁ제곱" data-cho="ㅇㅊㅈ 2" title="위첨자 2 · ㅁ제곱 + 스페이스">²</button><button class="g" data-c="³" data-n="위첨자 3" data-s="ㅁ세제곱" data-cho="ㅇㅊㅈ 3" title="위첨자 3 · ㅁ세제곱 + 스페이스">³</button><button class="g" data-c="㎏" data-n="킬로그램(합자)" data-s="ㅁ킬로그램" data-cho="ㅋㄹㄱㄹ(ㅎㅈ)" title="킬로그램(합자) · ㅁ킬로그램 + 스페이스">㎏</button><button class="g" data-c="㎜" data-n="밀리미터(합자)" data-s="ㅁ밀리미터" data-cho="ㅁㄹㅁㅌ(ㅎㅈ)" title="밀리미터(합자) · ㅁ밀리미터 + 스페이스">㎜</button><button class="g" data-c="㎝" data-n="센티미터(합자)" data-s="ㅁ센티" data-cho="ㅅㅌㅁㅌ(ㅎㅈ)" title="센티미터(합자) · ㅁ센티 + 스페이스">㎝</button><button class="g" data-c="㎞" data-n="킬로미터(합자)" data-s="ㅁ킬로미터" data-cho="ㅋㄹㅁㅌ(ㅎㅈ)" title="킬로미터(합자) · ㅁ킬로미터 + 스페이스">㎞</button><button class="g" data-c="ℓ" data-n="리터" data-s="ㅁ리터" data-cho="ㄹㅌ" title="리터 · ㅁ리터 + 스페이스">ℓ</button><button class="g" data-c="㎖" data-n="밀리리터(합자)" data-s="ㅁ밀리리터" data-cho="ㅁㄹㄹㅌ(ㅎㅈ)" title="밀리리터(합자) · ㅁ밀리리터 + 스페이스">㎖</button><button class="g" data-c="㎥" data-n="세제곱미터" data-s="ㅁ세제곱미터" data-cho="ㅅㅈㄱㅁㅌ" title="세제곱미터 · ㅁ세제곱미터 + 스페이스">㎥</button><button class="g" data-c="㎥" data-n="세제곱미터(루베)" data-s="ㅁ루베" data-cho="ㅅㅈㄱㅁㅌ(ㄹㅂ)" title="세제곱미터(루베) · ㅁ루베 + 스페이스">㎥</button><button class="g" data-c="€" data-n="유로" data-s="ㅁ유로" data-cho="ㅇㄹ" title="유로 · ㅁ유로 + 스페이스">€</button><button class="g" data-c="⑥" data-n="원문자 6" data-s="ㅁ6" data-cho="ㅇㅁㅈ 6" title="원문자 6 · ㅁ6 + 스페이스">⑥</button><button class="g" data-c="⑦" data-n="원문자 7" data-s="ㅁ7" data-cho="ㅇㅁㅈ 7" title="원문자 7 · ㅁ7 + 스페이스">⑦</button><button class="g" data-c="⑧" data-n="원문자 8" data-s="ㅁ8" data-cho="ㅇㅁㅈ 8" title="원문자 8 · ㅁ8 + 스페이스">⑧</button><button class="g" data-c="⑨" data-n="원문자 9" data-s="ㅁ9" data-cho="ㅇㅁㅈ 9" title="원문자 9 · ㅁ9 + 스페이스">⑨</button><button class="g" data-c="⑩" data-n="원문자 10" data-s="ㅁ10" data-cho="ㅇㅁㅈ 10" title="원문자 10 · ㅁ10 + 스페이스">⑩</button><button class="g" data-c="㉠" data-n="한글 원문자 ㄱ" data-s="ㅁ원ㄱ" data-cho="ㅎㄱ ㅇㅁㅈ ㄱ" title="한글 원문자 ㄱ · ㅁ원ㄱ + 스페이스">㉠</button><button class="g" data-c="㉡" data-n="한글 원문자 ㄴ" data-s="ㅁ원ㄴ" data-cho="ㅎㄱ ㅇㅁㅈ ㄴ" title="한글 원문자 ㄴ · ㅁ원ㄴ + 스페이스">㉡</button><button class="g" data-c="㉢" data-n="한글 원문자 ㄷ" data-s="ㅁ원ㄷ" data-cho="ㅎㄱ ㅇㅁㅈ ㄷ" title="한글 원문자 ㄷ · ㅁ원ㄷ + 스페이스">㉢</button><button class="g" data-c="㉣" data-n="한글 원문자 ㄹ" data-s="ㅁ원ㄹ" data-cho="ㅎㄱ ㅇㅁㅈ ㄹ" title="한글 원문자 ㄹ · ㅁ원ㄹ + 스페이스">㉣</button><button class="g" data-c="㉤" data-n="한글 원문자 ㅁ" data-s="ㅁ원ㅁ" data-cho="ㅎㄱ ㅇㅁㅈ ㅁ" title="한글 원문자 ㅁ · ㅁ원ㅁ + 스페이스">㉤</button><button class="g" data-c="Ⅰ" data-n="로마숫자 1" data-s="ㅁ로마1" data-cho="ㄹㅁㅅㅈ 1" title="로마숫자 1 · ㅁ로마1 + 스페이스">Ⅰ</button><button class="g" data-c="Ⅱ" data-n="로마숫자 2" data-s="ㅁ로마2" data-cho="ㄹㅁㅅㅈ 2" title="로마숫자 2 · ㅁ로마2 + 스페이스">Ⅱ</button><button class="g" data-c="Ⅲ" data-n="로마숫자 3" data-s="ㅁ로마3" data-cho="ㄹㅁㅅㅈ 3" title="로마숫자 3 · ㅁ로마3 + 스페이스">Ⅲ</button><button class="g" data-c="Ⅳ" data-n="로마숫자 4" data-s="ㅁ로마4" data-cho="ㄹㅁㅅㅈ 4" title="로마숫자 4 · ㅁ로마4 + 스페이스">Ⅳ</button><button class="g" data-c="Ⅴ" data-n="로마숫자 5" data-s="ㅁ로마5" data-cho="ㄹㅁㅅㅈ 5" title="로마숫자 5 · ㅁ로마5 + 스페이스">Ⅴ</button><button class="g" data-c="™" data-n="상표 기호" data-s="ㅁ상표" data-cho="ㅅㅍ ㄱㅎ" title="상표 기호 · ㅁ상표 + 스페이스">™</button><button class="g" data-c="®" data-n="등록상표 기호" data-s="ㅁ등록상표" data-cho="ㄷㄹㅅㅍ ㄱㅎ" title="등록상표 기호 · ㅁ등록상표 + 스페이스">®</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c3)"></span>괄호 · 문장부호 · 맥 키</div><div class="row"><button class="g" data-c="「」" data-n="홑낫표" data-s="ㅁ낫표" data-cho="ㅎㄴㅍ" title="홑낫표 · ㅁ낫표 + 스페이스">「」</button><button class="g" data-c="·" data-n="가운뎃점" data-s="ㅁ점" data-cho="ㄱㅇㄷㅈ" title="가운뎃점 · ㅁ점 + 스페이스">·</button><button class="g" data-c="…" data-n="말줄임표" data-s="ㅁ줄임" data-cho="ㅁㅈㅇㅍ" title="말줄임표 · ㅁ줄임 + 스페이스">…</button><button class="g" data-c="⌘" data-n="커맨드 키" data-s="ㅁ커맨드" data-cho="ㅋㅁㄷ ㅋ" title="커맨드 키 · ㅁ커맨드 + 스페이스">⌘</button><button class="g" data-c="•" data-n="불릿(글머리점)" data-s="ㅁ불릿" data-cho="ㅂㄹ(ㄱㅁㄹㅈ)" title="불릿(글머리점) · ㅁ불릿 + 스페이스">•</button><button class="g" data-c="『』" data-n="겹낫표" data-s="ㅁ겹낫표" data-cho="ㄱㄴㅍ" title="겹낫표 · ㅁ겹낫표 + 스페이스">『』</button><button class="g" data-c="【】" data-n="검은괄호(실괄호)" data-s="ㅁ검은괄호" data-cho="ㄱㅇㄱㅎ(ㅅㄱㅎ)" title="검은괄호(실괄호) · ㅁ검은괄호 + 스페이스">【】</button><button class="g" data-c="〈〉" data-n="홑화살괄호" data-s="ㅁ꺾쇠" data-cho="ㅎㅎㅅㄱㅎ" title="홑화살괄호 · ㅁ꺾쇠 + 스페이스">〈〉</button><button class="g" data-c="《》" data-n="겹화살괄호" data-s="ㅁ겹꺾쇠" data-cho="ㄱㅎㅅㄱㅎ" title="겹화살괄호 · ㅁ겹꺾쇠 + 스페이스">《》</button><button class="g" data-c="—" data-n="줄표(엠 대시)" data-s="ㅁ줄표" data-cho="ㅈㅍ(ㅇ ㄷㅅ)" title="줄표(엠 대시) · ㅁ줄표 + 스페이스">—</button><button class="g" data-c="✔" data-n="굵은 체크" data-s="ㅁ굵은체크" data-cho="ㄱㅇ ㅊㅋ" title="굵은 체크 · ㅁ굵은체크 + 스페이스">✔</button><button class="g" data-c="✗" data-n="엑스 표시(벌러트 X)" data-s="ㅁ엑스" data-cho="ㅇㅅ ㅍㅅ(ㅂㄹㅌ X)" title="엑스 표시(벌러트 X) · ㅁ엑스 + 스페이스">✗</button><button class="g" data-c="☑" data-n="체크된 체크박스" data-s="ㅁ체크박스" data-cho="ㅊㅋㄷ ㅊㅋㅂㅅ" title="체크된 체크박스 · ㅁ체크박스 + 스페이스">☑</button><button class="g" data-c="⌥" data-n="옵션 키" data-s="ㅁ옵션" data-cho="ㅇㅅ ㅋ" title="옵션 키 · ㅁ옵션 + 스페이스">⌥</button><button class="g" data-c="⇧" data-n="시프트 키" data-s="ㅁ시프트" data-cho="ㅅㅍㅌ ㅋ" title="시프트 키 · ㅁ시프트 + 스페이스">⇧</button><button class="g" data-c="⌃" data-n="컨트롤 키" data-s="ㅁ컨트롤" data-cho="ㅋㅌㄹ ㅋ" title="컨트롤 키 · ㅁ컨트롤 + 스페이스">⌃</button><button class="g" data-c="▸" data-n="작은 오른쪽 삼각형" data-s="ㅁ토글" data-cho="ㅈㅇ ㅇㄹㅉ ㅅㄱㅎ" title="작은 오른쪽 삼각형 · ㅁ토글 + 스페이스">▸</button><button class="g" data-c="–" data-n="엔 대시" data-s="ㅁ엔대시" data-cho="ㅇ ㄷㅅ" title="엔 대시 · ㅁ엔대시 + 스페이스">–</button><button class="g" data-c="☐" data-n="빈 체크박스" data-s="ㅁ빈박스" data-cho="ㅂ ㅊㅋㅂㅅ" title="빈 체크박스 · ㅁ빈박스 + 스페이스">☐</button></div></div><div class="sec"><div class="lbl"><span class="dot" style="background:var(--c4)"></span>조합</div><div class="row"><button class="g long" data-c="★☆☆☆☆" data-n="별점 1점" data-s="ㅁ별점1" data-cho="ㅂㅈ 1ㅈ" title="별점 1점 · ㅁ별점1 + 스페이스">★☆☆☆☆</button><button class="g long" data-c="★★☆☆☆" data-n="별점 2점" data-s="ㅁ별점2" data-cho="ㅂㅈ 2ㅈ" title="별점 2점 · ㅁ별점2 + 스페이스">★★☆☆☆</button><button class="g long" data-c="★★★☆☆" data-n="별점 3점" data-s="ㅁ별점3" data-cho="ㅂㅈ 3ㅈ" title="별점 3점 · ㅁ별점3 + 스페이스">★★★☆☆</button><button class="g long" data-c="★★★★☆" data-n="별점 4점" data-s="ㅁ별점4" data-cho="ㅂㅈ 4ㅈ" title="별점 4점 · ㅁ별점4 + 스페이스">★★★★☆</button><button class="g long" data-c="★★★★★" data-n="별점 5점" data-s="ㅁ별점5" data-cho="ㅂㅈ 5ㅈ" title="별점 5점 · ㅁ별점5 + 스페이스">★★★★★</button><button class="g long" data-c="【이노하이】" data-n="이노하이 말머리" data-s="ㅁ이노하이" data-cho="ㅇㄴㅎㅇ ㅁㅁㄹ" title="이노하이 말머리 · ㅁ이노하이 + 스페이스">【이노하이】</button></div></div>
+  <div class="sec" id="top-sec" hidden>
+    <div class="lbl" role="button" aria-expanded="true"><span class="dot" style="background:var(--c3)"></span><span class="lbl-t">자주 쓰는</span><span class="lbl-n" id="top-n">0</span></div>
+    <div class="row" id="top-row"></div>
+  </div>
+  <div class="sec" data-cat="hanja-classic"><div class="lbl" role="button" tabindex="-1" aria-expanded="true"><span class="dot" style="background:var(--c1)"></span><span class="lbl-t">한자키 클래식</span><span class="lbl-n">30</span></div><div class="row" role="row"><button class="g" role="gridcell" data-c="★" data-n="검은 별표" data-s="ㅁ별" data-cho="ㄱㅇ ㅂㅍ" data-a="" data-u="U+2605" data-cat="hanja-classic" aria-label="검은 별표 ㅁ별" title="검은 별표 · ㅁ별 + 스페이스"><span class="gc">★</span><span class="gs">별</span></button><button class="g" role="gridcell" data-c="☆" data-n="빈 별표" data-s="ㅁ빈별" data-cho="ㅂ ㅂㅍ" data-a="" data-u="U+2606" data-cat="hanja-classic" aria-label="빈 별표 ㅁ빈별" title="빈 별표 · ㅁ빈별 + 스페이스"><span class="gc">☆</span><span class="gs">빈별</span></button><button class="g" role="gridcell" data-c="○" data-n="빈 동그라미" data-s="ㅁ빈원" data-cho="ㅂ ㄷㄱㄹㅁ" data-a="" data-u="U+25CB" data-cat="hanja-classic" aria-label="빈 동그라미 ㅁ빈원" title="빈 동그라미 · ㅁ빈원 + 스페이스"><span class="gc">○</span><span class="gs">빈원</span></button><button class="g" role="gridcell" data-c="♡" data-n="빈 하트" data-s="ㅁ빈하트" data-cho="ㅂ ㅎㅌ" data-a="" data-u="U+2661" data-cat="hanja-classic" aria-label="빈 하트 ㅁ빈하트" title="빈 하트 · ㅁ빈하트 + 스페이스"><span class="gc">♡</span><span class="gs">빈하트</span></button><button class="g" role="gridcell" data-c="→" data-n="오른쪽 화살표" data-s="ㅁ오른" data-cho="ㅇㄹㅉ ㅎㅅㅍ" data-a="" data-u="U+2192" data-cat="hanja-classic" aria-label="오른쪽 화살표 ㅁ오른" title="오른쪽 화살표 · ㅁ오른 + 스페이스"><span class="gc">→</span><span class="gs">오른</span></button><button class="g" role="gridcell" data-c="●" data-n="검은 동그라미" data-s="ㅁ원" data-cho="ㄱㅇ ㄷㄱㄹㅁ" data-a="" data-u="U+25CF" data-cat="hanja-classic" aria-label="검은 동그라미 ㅁ원" title="검은 동그라미 · ㅁ원 + 스페이스"><span class="gc">●</span><span class="gs">원</span></button><button class="g" role="gridcell" data-c="※" data-n="당구장 표시(참고표)" data-s="ㅁ참고" data-cho="ㄷㄱㅈ ㅍㅅ(ㅊㄱㅍ)" data-a="" data-u="U+203B" data-cat="hanja-classic" aria-label="당구장 표시(참고표) ㅁ참고" title="당구장 표시(참고표) · ㅁ참고 + 스페이스"><span class="gc">※</span><span class="gs">참고</span></button><button class="g" role="gridcell" data-c="✓" data-n="체크 표시" data-s="ㅁ체크" data-cho="ㅊㅋ ㅍㅅ" data-a="" data-u="U+2713" data-cat="hanja-classic" aria-label="체크 표시 ㅁ체크" title="체크 표시 · ㅁ체크 + 스페이스"><span class="gc">✓</span><span class="gs">체크</span></button><button class="g" role="gridcell" data-c="♥" data-n="검은 하트" data-s="ㅁ하트" data-cho="ㄱㅇ ㅎㅌ" data-a="" data-u="U+2665" data-cat="hanja-classic" aria-label="검은 하트 ㅁ하트" title="검은 하트 · ㅁ하트 + 스페이스"><span class="gc">♥</span><span class="gs">하트</span></button><button class="g" role="gridcell" data-c="⇒" data-n="이중 화살표" data-s="ㅁ겹우" data-cho="ㅇㅈ ㅎㅅㅍ" data-a="" data-u="U+21D2" data-cat="hanja-classic" aria-label="이중 화살표 ㅁ겹우" title="이중 화살표 · ㅁ겹우 + 스페이스"><span class="gc">⇒</span><span class="gs">겹우</span></button><button class="g" role="gridcell" data-c="◎" data-n="겹 동그라미" data-s="ㅁ겹원" data-cho="ㄱ ㄷㄱㄹㅁ" data-a="" data-u="U+25CE" data-cat="hanja-classic" aria-label="겹 동그라미 ㅁ겹원" title="겹 동그라미 · ㅁ겹원 + 스페이스"><span class="gc">◎</span><span class="gs">겹원</span></button><button class="g" role="gridcell" data-c="♬" data-n="겹음표" data-s="ㅁ겹음표" data-cho="ㄱㅇㅍ" data-a="" data-u="U+266C" data-cat="hanja-classic" aria-label="겹음표 ㅁ겹음표" title="겹음표 · ㅁ겹음표 + 스페이스"><span class="gc">♬</span><span class="gs">겹음표</span></button><button class="g" role="gridcell" data-c="■" data-n="검은 네모" data-s="ㅁ네모" data-cho="ㄱㅇ ㄴㅁ" data-a="" data-u="U+25A0" data-cat="hanja-classic" aria-label="검은 네모 ㅁ네모" title="검은 네모 · ㅁ네모 + 스페이스"><span class="gc">■</span><span class="gs">네모</span></button><button class="g" role="gridcell" data-c="◆" data-n="검은 마름모" data-s="ㅁ마름모" data-cho="ㄱㅇ ㅁㄹㅁ" data-a="" data-u="U+25C6" data-cat="hanja-classic" aria-label="검은 마름모 ㅁ마름모" title="검은 마름모 · ㅁ마름모 + 스페이스"><span class="gc">◆</span><span class="gs">마름모</span></button><button class="g" role="gridcell" data-c="□" data-n="빈 네모" data-s="ㅁ빈네모" data-cho="ㅂ ㄴㅁ" data-a="" data-u="U+25A1" data-cat="hanja-classic" aria-label="빈 네모 ㅁ빈네모" title="빈 네모 · ㅁ빈네모 + 스페이스"><span class="gc">□</span><span class="gs">빈네모</span></button><button class="g" role="gridcell" data-c="◇" data-n="빈 마름모" data-s="ㅁ빈마름모" data-cho="ㅂ ㅁㄹㅁ" data-a="" data-u="U+25C7" data-cat="hanja-classic" aria-label="빈 마름모 ㅁ빈마름모" title="빈 마름모 · ㅁ빈마름모 + 스페이스"><span class="gc">◇</span><span class="gs">빈마름모</span></button><button class="g" role="gridcell" data-c="△" data-n="빈 세모" data-s="ㅁ빈세모" data-cho="ㅂ ㅅㅁ" data-a="" data-u="U+25B3" data-cat="hanja-classic" aria-label="빈 세모 ㅁ빈세모" title="빈 세모 · ㅁ빈세모 + 스페이스"><span class="gc">△</span><span class="gs">빈세모</span></button><button class="g" role="gridcell" data-c="▲" data-n="검은 세모" data-s="ㅁ세모" data-cho="ㄱㅇ ㅅㅁ" data-a="" data-u="U+25B2" data-cat="hanja-classic" aria-label="검은 세모 ㅁ세모" title="검은 세모 · ㅁ세모 + 스페이스"><span class="gc">▲</span><span class="gs">세모</span></button><button class="g" role="gridcell" data-c="↓" data-n="아래쪽 화살표" data-s="ㅁ아래" data-cho="ㅇㄹㅉ ㅎㅅㅍ" data-a="" data-u="U+2193" data-cat="hanja-classic" aria-label="아래쪽 화살표 ㅁ아래" title="아래쪽 화살표 · ㅁ아래 + 스페이스"><span class="gc">↓</span><span class="gs">아래</span></button><button class="g" role="gridcell" data-c="↔" data-n="양쪽 화살표" data-s="ㅁ양쪽" data-cho="ㅇㅉ ㅎㅅㅍ" data-a="" data-u="U+2194" data-cat="hanja-classic" aria-label="양쪽 화살표 ㅁ양쪽" title="양쪽 화살표 · ㅁ양쪽 + 스페이스"><span class="gc">↔</span><span class="gs">양쪽</span></button><button class="g" role="gridcell" data-c="▼" data-n="검은 역세모" data-s="ㅁ역세모" data-cho="ㄱㅇ ㅇㅅㅁ" data-a="" data-u="U+25BC" data-cat="hanja-classic" aria-label="검은 역세모 ㅁ역세모" title="검은 역세모 · ㅁ역세모 + 스페이스"><span class="gc">▼</span><span class="gs">역세모</span></button><button class="g" role="gridcell" data-c="←" data-n="왼쪽 화살표" data-s="ㅁ왼" data-cho="ㅇㅉ ㅎㅅㅍ" data-a="" data-u="U+2190" data-cat="hanja-classic" aria-label="왼쪽 화살표 ㅁ왼" title="왼쪽 화살표 · ㅁ왼 + 스페이스"><span class="gc">←</span><span class="gs">왼</span></button><button class="g" role="gridcell" data-c="▶" data-n="오른쪽 검은 삼각형" data-s="ㅁ우삼각" data-cho="ㅇㄹㅉ ㄱㅇ ㅅㄱㅎ" data-a="" data-u="U+25B6" data-cat="hanja-classic" aria-label="오른쪽 검은 삼각형 ㅁ우삼각" title="오른쪽 검은 삼각형 · ㅁ우삼각 + 스페이스"><span class="gc">▶</span><span class="gs">우삼각</span></button><button class="g" role="gridcell" data-c="☞" data-n="오른쪽 손가락" data-s="ㅁ우손" data-cho="ㅇㄹㅉ ㅅㄱㄹ" data-a="" data-u="U+261E" data-cat="hanja-classic" aria-label="오른쪽 손가락 ㅁ우손" title="오른쪽 손가락 · ㅁ우손 + 스페이스"><span class="gc">☞</span><span class="gs">우손</span></button><button class="g" role="gridcell" data-c="↑" data-n="위쪽 화살표" data-s="ㅁ위" data-cho="ㅇㅉ ㅎㅅㅍ" data-a="" data-u="U+2191" data-cat="hanja-classic" aria-label="위쪽 화살표 ㅁ위" title="위쪽 화살표 · ㅁ위 + 스페이스"><span class="gc">↑</span><span class="gs">위</span></button><button class="g" role="gridcell" data-c="♪" data-n="음표(8분음표)" data-s="ㅁ음표" data-cho="ㅇㅍ(8ㅂㅇㅍ)" data-a="" data-u="U+266A" data-cat="hanja-classic" aria-label="음표(8분음표) ㅁ음표" title="음표(8분음표) · ㅁ음표 + 스페이스"><span class="gc">♪</span><span class="gs">음표</span></button><button class="g" role="gridcell" data-c="☎" data-n="전화기 기호" data-s="ㅁ전화" data-cho="ㅈㅎㄱ ㄱㅎ" data-a="" data-u="U+260E" data-cat="hanja-classic" aria-label="전화기 기호 ㅁ전화" title="전화기 기호 · ㅁ전화 + 스페이스"><span class="gc">☎</span><span class="gs">전화</span></button><button class="g" role="gridcell" data-c="▽" data-n="빈 역세모" data-s="ㅁ빈역세모" data-cho="ㅂ ㅇㅅㅁ" data-a="" data-u="U+25BD" data-cat="hanja-classic" aria-label="빈 역세모 ㅁ빈역세모" title="빈 역세모 · ㅁ빈역세모 + 스페이스"><span class="gc">▽</span><span class="gs">빈역세모</span></button><button class="g" role="gridcell" data-c="↗" data-n="우상향 화살표" data-s="ㅁ우상" data-cho="ㅇㅅㅎ ㅎㅅㅍ" data-a="" data-u="U+2197" data-cat="hanja-classic" aria-label="우상향 화살표 ㅁ우상" title="우상향 화살표 · ㅁ우상 + 스페이스"><span class="gc">↗</span><span class="gs">우상</span></button><button class="g" role="gridcell" data-c="↘" data-n="우하향 화살표" data-s="ㅁ우하" data-cho="ㅇㅎㅎ ㅎㅅㅍ" data-a="" data-u="U+2198" data-cat="hanja-classic" aria-label="우하향 화살표 ㅁ우하" title="우하향 화살표 · ㅁ우하 + 스페이스"><span class="gc">↘</span><span class="gs">우하</span></button></div></div><div class="sec" data-cat="work-units"><div class="lbl" role="button" tabindex="-1" aria-expanded="true"><span class="dot" style="background:var(--c2)"></span><span class="lbl-t">업무 · 단위 · 번호</span><span class="lbl-n">45</span></div><div class="row" role="row"><button class="g" role="gridcell" data-c="①" data-n="원문자 1" data-s="ㅁ1" data-cho="ㅇㅁㅈ 1" data-a="" data-u="U+2460" data-cat="work-units" aria-label="원문자 1 ㅁ1" title="원문자 1 · ㅁ1 + 스페이스"><span class="gc">①</span><span class="gs">1</span></button><button class="g" role="gridcell" data-c="②" data-n="원문자 2" data-s="ㅁ2" data-cho="ㅇㅁㅈ 2" data-a="" data-u="U+2461" data-cat="work-units" aria-label="원문자 2 ㅁ2" title="원문자 2 · ㅁ2 + 스페이스"><span class="gc">②</span><span class="gs">2</span></button><button class="g" role="gridcell" data-c="③" data-n="원문자 3" data-s="ㅁ3" data-cho="ㅇㅁㅈ 3" data-a="" data-u="U+2462" data-cat="work-units" aria-label="원문자 3 ㅁ3" title="원문자 3 · ㅁ3 + 스페이스"><span class="gc">③</span><span class="gs">3</span></button><button class="g" role="gridcell" data-c="④" data-n="원문자 4" data-s="ㅁ4" data-cho="ㅇㅁㅈ 4" data-a="" data-u="U+2463" data-cat="work-units" aria-label="원문자 4 ㅁ4" title="원문자 4 · ㅁ4 + 스페이스"><span class="gc">④</span><span class="gs">4</span></button><button class="g" role="gridcell" data-c="⑤" data-n="원문자 5" data-s="ㅁ5" data-cho="ㅇㅁㅈ 5" data-a="" data-u="U+2464" data-cat="work-units" aria-label="원문자 5 ㅁ5" title="원문자 5 · ㅁ5 + 스페이스"><span class="gc">⑤</span><span class="gs">5</span></button><button class="g" role="gridcell" data-c="×" data-n="곱하기표" data-s="ㅁ곱" data-cho="ㄱㅎㄱㅍ" data-a="" data-u="U+00D7" data-cat="work-units" aria-label="곱하기표 ㅁ곱" title="곱하기표 · ㅁ곱 + 스페이스"><span class="gc">×</span><span class="gs">곱</span></button><button class="g" role="gridcell" data-c="℃" data-n="섭씨" data-s="ㅁ섭씨" data-cho="ㅅㅆ" data-a="" data-u="U+2103" data-cat="work-units" aria-label="섭씨 ㅁ섭씨" title="섭씨 · ㅁ섭씨 + 스페이스"><span class="gc">℃</span><span class="gs">섭씨</span></button><button class="g" role="gridcell" data-c="㎡" data-n="제곱미터" data-s="ㅁ제곱미터" data-cho="ㅈㄱㅁㅌ" data-a="" data-u="U+33A1" data-cat="work-units" aria-label="제곱미터 ㅁ제곱미터" title="제곱미터 · ㅁ제곱미터 + 스페이스"><span class="gc">㎡</span><span class="gs">제곱미터</span></button><button class="g" role="gridcell" data-c="㈜" data-n="주식회사 기호" data-s="ㅁ주식" data-cho="ㅈㅅㅎㅅ ㄱㅎ" data-a="" data-u="U+321C" data-cat="work-units" aria-label="주식회사 기호 ㅁ주식" title="주식회사 기호 · ㅁ주식 + 스페이스"><span class="gc">㈜</span><span class="gs">주식</span></button><button class="g" role="gridcell" data-c="⑩" data-n="원문자 10" data-s="ㅁ10" data-cho="ㅇㅁㅈ 10" data-a="" data-u="U+2469" data-cat="work-units" aria-label="원문자 10 ㅁ10" title="원문자 10 · ㅁ10 + 스페이스"><span class="gc">⑩</span><span class="gs">10</span></button><button class="g" role="gridcell" data-c="⑥" data-n="원문자 6" data-s="ㅁ6" data-cho="ㅇㅁㅈ 6" data-a="" data-u="U+2465" data-cat="work-units" aria-label="원문자 6 ㅁ6" title="원문자 6 · ㅁ6 + 스페이스"><span class="gc">⑥</span><span class="gs">6</span></button><button class="g" role="gridcell" data-c="⑦" data-n="원문자 7" data-s="ㅁ7" data-cho="ㅇㅁㅈ 7" data-a="" data-u="U+2466" data-cat="work-units" aria-label="원문자 7 ㅁ7" title="원문자 7 · ㅁ7 + 스페이스"><span class="gc">⑦</span><span class="gs">7</span></button><button class="g" role="gridcell" data-c="⑧" data-n="원문자 8" data-s="ㅁ8" data-cho="ㅇㅁㅈ 8" data-a="" data-u="U+2467" data-cat="work-units" aria-label="원문자 8 ㅁ8" title="원문자 8 · ㅁ8 + 스페이스"><span class="gc">⑧</span><span class="gs">8</span></button><button class="g" role="gridcell" data-c="⑨" data-n="원문자 9" data-s="ㅁ9" data-cho="ㅇㅁㅈ 9" data-a="" data-u="U+2468" data-cat="work-units" aria-label="원문자 9 ㅁ9" title="원문자 9 · ㅁ9 + 스페이스"><span class="gc">⑨</span><span class="gs">9</span></button><button class="g" role="gridcell" data-c="°" data-n="도(각도)" data-s="ㅁ각도" data-cho="ㄷ(ㄱㄷ)" data-a="" data-u="U+00B0" data-cat="work-units" aria-label="도(각도) ㅁ각도" title="도(각도) · ㅁ각도 + 스페이스"><span class="gc">°</span><span class="gs">각도</span></button><button class="g" role="gridcell" data-c="÷" data-n="나누기표" data-s="ㅁ나누기" data-cho="ㄴㄴㄱㅍ" data-a="" data-u="U+00F7" data-cat="work-units" aria-label="나누기표 ㅁ나누기" title="나누기표 · ㅁ나누기 + 스페이스"><span class="gc">÷</span><span class="gs">나누기</span></button><button class="g" role="gridcell" data-c="≠" data-n="같지않음" data-s="ㅁ다름" data-cho="ㄱㅈㅇㅇ" data-a="" data-u="U+2260" data-cat="work-units" aria-label="같지않음 ㅁ다름" title="같지않음 · ㅁ다름 + 스페이스"><span class="gc">≠</span><span class="gs">다름</span></button><button class="g" role="gridcell" data-c="®" data-n="등록상표 기호" data-s="ㅁ등록상표" data-cho="ㄷㄹㅅㅍ ㄱㅎ" data-a="" data-u="U+00AE" data-cat="work-units" aria-label="등록상표 기호 ㅁ등록상표" title="등록상표 기호 · ㅁ등록상표 + 스페이스"><span class="gc">®</span><span class="gs">등록상표</span></button><button class="g" role="gridcell" data-c="Ⅰ" data-n="로마숫자 1" data-s="ㅁ로마1" data-cho="ㄹㅁㅅㅈ 1" data-a="" data-u="U+2160" data-cat="work-units" aria-label="로마숫자 1 ㅁ로마1" title="로마숫자 1 · ㅁ로마1 + 스페이스"><span class="gc">Ⅰ</span><span class="gs">로마1</span></button><button class="g" role="gridcell" data-c="Ⅱ" data-n="로마숫자 2" data-s="ㅁ로마2" data-cho="ㄹㅁㅅㅈ 2" data-a="" data-u="U+2161" data-cat="work-units" aria-label="로마숫자 2 ㅁ로마2" title="로마숫자 2 · ㅁ로마2 + 스페이스"><span class="gc">Ⅱ</span><span class="gs">로마2</span></button><button class="g" role="gridcell" data-c="Ⅲ" data-n="로마숫자 3" data-s="ㅁ로마3" data-cho="ㄹㅁㅅㅈ 3" data-a="" data-u="U+2162" data-cat="work-units" aria-label="로마숫자 3 ㅁ로마3" title="로마숫자 3 · ㅁ로마3 + 스페이스"><span class="gc">Ⅲ</span><span class="gs">로마3</span></button><button class="g" role="gridcell" data-c="Ⅳ" data-n="로마숫자 4" data-s="ㅁ로마4" data-cho="ㄹㅁㅅㅈ 4" data-a="" data-u="U+2163" data-cat="work-units" aria-label="로마숫자 4 ㅁ로마4" title="로마숫자 4 · ㅁ로마4 + 스페이스"><span class="gc">Ⅳ</span><span class="gs">로마4</span></button><button class="g" role="gridcell" data-c="Ⅴ" data-n="로마숫자 5" data-s="ㅁ로마5" data-cho="ㄹㅁㅅㅈ 5" data-a="" data-u="U+2164" data-cat="work-units" aria-label="로마숫자 5 ㅁ로마5" title="로마숫자 5 · ㅁ로마5 + 스페이스"><span class="gc">Ⅴ</span><span class="gs">로마5</span></button><button class="g" role="gridcell" data-c="㎥" data-n="세제곱미터(루베)" data-s="ㅁ루베" data-cho="ㅅㅈㄱㅁㅌ(ㄹㅂ)" data-a="" data-u="U+33A5" data-cat="work-units" aria-label="세제곱미터(루베) ㅁ루베" title="세제곱미터(루베) · ㅁ루베 + 스페이스"><span class="gc">㎥</span><span class="gs">루베</span></button><button class="g" role="gridcell" data-c="ℓ" data-n="리터" data-s="ㅁ리터" data-cho="ㄹㅌ" data-a="" data-u="U+2113" data-cat="work-units" aria-label="리터 ㅁ리터" title="리터 · ㅁ리터 + 스페이스"><span class="gc">ℓ</span><span class="gs">리터</span></button><button class="g" role="gridcell" data-c="㎖" data-n="밀리리터(합자)" data-s="ㅁ밀리리터" data-cho="ㅁㄹㄹㅌ(ㅎㅈ)" data-a="" data-u="U+3396" data-cat="work-units" aria-label="밀리리터(합자) ㅁ밀리리터" title="밀리리터(합자) · ㅁ밀리리터 + 스페이스"><span class="gc">㎖</span><span class="gs">밀리리터</span></button><button class="g" role="gridcell" data-c="㎜" data-n="밀리미터(합자)" data-s="ㅁ밀리미터" data-cho="ㅁㄹㅁㅌ(ㅎㅈ)" data-a="" data-u="U+339C" data-cat="work-units" aria-label="밀리미터(합자) ㅁ밀리미터" title="밀리미터(합자) · ㅁ밀리미터 + 스페이스"><span class="gc">㎜</span><span class="gs">밀리미터</span></button><button class="g" role="gridcell" data-c="™" data-n="상표 기호" data-s="ㅁ상표" data-cho="ㅅㅍ ㄱㅎ" data-a="" data-u="U+2122" data-cat="work-units" aria-label="상표 기호 ㅁ상표" title="상표 기호 · ㅁ상표 + 스페이스"><span class="gc">™</span><span class="gs">상표</span></button><button class="g" role="gridcell" data-c="³" data-n="위첨자 3" data-s="ㅁ세제곱" data-cho="ㅇㅊㅈ 3" data-a="" data-u="U+00B3" data-cat="work-units" aria-label="위첨자 3 ㅁ세제곱" title="위첨자 3 · ㅁ세제곱 + 스페이스"><span class="gc">³</span><span class="gs">세제곱</span></button><button class="g" role="gridcell" data-c="㎥" data-n="세제곱미터" data-s="ㅁ세제곱미터" data-cho="ㅅㅈㄱㅁㅌ" data-a="" data-u="U+33A5" data-cat="work-units" aria-label="세제곱미터 ㅁ세제곱미터" title="세제곱미터 · ㅁ세제곱미터 + 스페이스"><span class="gc">㎥</span><span class="gs">세제곱미터</span></button><button class="g" role="gridcell" data-c="㎝" data-n="센티미터(합자)" data-s="ㅁ센티" data-cho="ㅅㅌㅁㅌ(ㅎㅈ)" data-a="" data-u="U+339D" data-cat="work-units" aria-label="센티미터(합자) ㅁ센티" title="센티미터(합자) · ㅁ센티 + 스페이스"><span class="gc">㎝</span><span class="gs">센티</span></button><button class="g" role="gridcell" data-c="≒" data-n="약(근사)기호" data-s="ㅁ약" data-cho="ㅇ(ㄱㅅ)ㄱㅎ" data-a="" data-u="U+2252" data-cat="work-units" aria-label="약(근사)기호 ㅁ약" title="약(근사)기호 · ㅁ약 + 스페이스"><span class="gc">≒</span><span class="gs">약</span></button><button class="g" role="gridcell" data-c="㉠" data-n="한글 원문자 ㄱ" data-s="ㅁ원ㄱ" data-cho="ㅎㄱ ㅇㅁㅈ ㄱ" data-a="" data-u="U+3260" data-cat="work-units" aria-label="한글 원문자 ㄱ ㅁ원ㄱ" title="한글 원문자 ㄱ · ㅁ원ㄱ + 스페이스"><span class="gc">㉠</span><span class="gs">원ㄱ</span></button><button class="g" role="gridcell" data-c="㉡" data-n="한글 원문자 ㄴ" data-s="ㅁ원ㄴ" data-cho="ㅎㄱ ㅇㅁㅈ ㄴ" data-a="" data-u="U+3261" data-cat="work-units" aria-label="한글 원문자 ㄴ ㅁ원ㄴ" title="한글 원문자 ㄴ · ㅁ원ㄴ + 스페이스"><span class="gc">㉡</span><span class="gs">원ㄴ</span></button><button class="g" role="gridcell" data-c="㉢" data-n="한글 원문자 ㄷ" data-s="ㅁ원ㄷ" data-cho="ㅎㄱ ㅇㅁㅈ ㄷ" data-a="" data-u="U+3262" data-cat="work-units" aria-label="한글 원문자 ㄷ ㅁ원ㄷ" title="한글 원문자 ㄷ · ㅁ원ㄷ + 스페이스"><span class="gc">㉢</span><span class="gs">원ㄷ</span></button><button class="g" role="gridcell" data-c="㉣" data-n="한글 원문자 ㄹ" data-s="ㅁ원ㄹ" data-cho="ㅎㄱ ㅇㅁㅈ ㄹ" data-a="" data-u="U+3263" data-cat="work-units" aria-label="한글 원문자 ㄹ ㅁ원ㄹ" title="한글 원문자 ㄹ · ㅁ원ㄹ + 스페이스"><span class="gc">㉣</span><span class="gs">원ㄹ</span></button><button class="g" role="gridcell" data-c="㉤" data-n="한글 원문자 ㅁ" data-s="ㅁ원ㅁ" data-cho="ㅎㄱ ㅇㅁㅈ ㅁ" data-a="" data-u="U+3264" data-cat="work-units" aria-label="한글 원문자 ㅁ ㅁ원ㅁ" title="한글 원문자 ㅁ · ㅁ원ㅁ + 스페이스"><span class="gc">㉤</span><span class="gs">원ㅁ</span></button><button class="g" role="gridcell" data-c="€" data-n="유로" data-s="ㅁ유로" data-cho="ㅇㄹ" data-a="" data-u="U+20AC" data-cat="work-units" aria-label="유로 ㅁ유로" title="유로 · ㅁ유로 + 스페이스"><span class="gc">€</span><span class="gs">유로</span></button><button class="g" role="gridcell" data-c="≥" data-n="크거나같음" data-s="ㅁ이상" data-cho="ㅋㄱㄴㄱㅇ" data-a="" data-u="U+2265" data-cat="work-units" aria-label="크거나같음 ㅁ이상" title="크거나같음 · ㅁ이상 + 스페이스"><span class="gc">≥</span><span class="gs">이상</span></button><button class="g" role="gridcell" data-c="≤" data-n="작거나같음" data-s="ㅁ이하" data-cho="ㅈㄱㄴㄱㅇ" data-a="" data-u="U+2264" data-cat="work-units" aria-label="작거나같음 ㅁ이하" title="작거나같음 · ㅁ이하 + 스페이스"><span class="gc">≤</span><span class="gs">이하</span></button><button class="g" role="gridcell" data-c="©" data-n="저작권 기호" data-s="ㅁ저작권" data-cho="ㅈㅈㄱ ㄱㅎ" data-a="" data-u="U+00A9" data-cat="work-units" aria-label="저작권 기호 ㅁ저작권" title="저작권 기호 · ㅁ저작권 + 스페이스"><span class="gc">©</span><span class="gs">저작권</span></button><button class="g" role="gridcell" data-c="²" data-n="위첨자 2" data-s="ㅁ제곱" data-cho="ㅇㅊㅈ 2" data-a="" data-u="U+00B2" data-cat="work-units" aria-label="위첨자 2 ㅁ제곱" title="위첨자 2 · ㅁ제곱 + 스페이스"><span class="gc">²</span><span class="gs">제곱</span></button><button class="g" role="gridcell" data-c="㎏" data-n="킬로그램(합자)" data-s="ㅁ킬로그램" data-cho="ㅋㄹㄱㄹ(ㅎㅈ)" data-a="" data-u="U+338F" data-cat="work-units" aria-label="킬로그램(합자) ㅁ킬로그램" title="킬로그램(합자) · ㅁ킬로그램 + 스페이스"><span class="gc">㎏</span><span class="gs">킬로그램</span></button><button class="g" role="gridcell" data-c="㎞" data-n="킬로미터(합자)" data-s="ㅁ킬로미터" data-cho="ㅋㄹㅁㅌ(ㅎㅈ)" data-a="" data-u="U+339E" data-cat="work-units" aria-label="킬로미터(합자) ㅁ킬로미터" title="킬로미터(합자) · ㅁ킬로미터 + 스페이스"><span class="gc">㎞</span><span class="gs">킬로미터</span></button><button class="g" role="gridcell" data-c="±" data-n="플러스마이너스" data-s="ㅁ플마" data-cho="ㅍㄹㅅㅁㅇㄴㅅ" data-a="" data-u="U+00B1" data-cat="work-units" aria-label="플러스마이너스 ㅁ플마" title="플러스마이너스 · ㅁ플마 + 스페이스"><span class="gc">±</span><span class="gs">플마</span></button></div></div><div class="sec" data-cat="punct-modern"><div class="lbl" role="button" tabindex="-1" aria-expanded="true"><span class="dot" style="background:var(--c3)"></span><span class="lbl-t">괄호 · 문장부호 · 맥 키</span><span class="lbl-n">19</span></div><div class="row" role="row"><button class="g" role="gridcell" data-c="「」" data-n="홑낫표" data-s="ㅁ낫표" data-cho="ㅎㄴㅍ" data-a="" data-u="U+300C U+300D" data-cat="punct-modern" aria-label="홑낫표 ㅁ낫표" title="홑낫표 · ㅁ낫표 + 스페이스"><span class="gc">「」</span><span class="gs">낫표</span></button><button class="g" role="gridcell" data-c="•" data-n="불릿(글머리점)" data-s="ㅁ불릿" data-cho="ㅂㄹ(ㄱㅁㄹㅈ)" data-a="" data-u="U+2022" data-cat="punct-modern" aria-label="불릿(글머리점) ㅁ불릿" title="불릿(글머리점) · ㅁ불릿 + 스페이스"><span class="gc">•</span><span class="gs">불릿</span></button><button class="g" role="gridcell" data-c="·" data-n="가운뎃점" data-s="ㅁ점" data-cho="ㄱㅇㄷㅈ" data-a="" data-u="U+00B7" data-cat="punct-modern" aria-label="가운뎃점 ㅁ점" title="가운뎃점 · ㅁ점 + 스페이스"><span class="gc">·</span><span class="gs">점</span></button><button class="g" role="gridcell" data-c="…" data-n="말줄임표" data-s="ㅁ줄임" data-cho="ㅁㅈㅇㅍ" data-a="" data-u="U+2026" data-cat="punct-modern" aria-label="말줄임표 ㅁ줄임" title="말줄임표 · ㅁ줄임 + 스페이스"><span class="gc">…</span><span class="gs">줄임</span></button><button class="g" role="gridcell" data-c="⌘" data-n="커맨드 키" data-s="ㅁ커맨드" data-cho="ㅋㅁㄷ ㅋ" data-a="" data-u="U+2318" data-cat="punct-modern" aria-label="커맨드 키 ㅁ커맨드" title="커맨드 키 · ㅁ커맨드 + 스페이스"><span class="gc">⌘</span><span class="gs">커맨드</span></button><button class="g" role="gridcell" data-c="【】" data-n="검은괄호(실괄호)" data-s="ㅁ검은괄호" data-cho="ㄱㅇㄱㅎ(ㅅㄱㅎ)" data-a="" data-u="U+3010 U+3011" data-cat="punct-modern" aria-label="검은괄호(실괄호) ㅁ검은괄호" title="검은괄호(실괄호) · ㅁ검은괄호 + 스페이스"><span class="gc">【】</span><span class="gs">검은괄호</span></button><button class="g" role="gridcell" data-c="《》" data-n="겹화살괄호" data-s="ㅁ겹꺾쇠" data-cho="ㄱㅎㅅㄱㅎ" data-a="" data-u="U+300A U+300B" data-cat="punct-modern" aria-label="겹화살괄호 ㅁ겹꺾쇠" title="겹화살괄호 · ㅁ겹꺾쇠 + 스페이스"><span class="gc">《》</span><span class="gs">겹꺾쇠</span></button><button class="g" role="gridcell" data-c="『』" data-n="겹낫표" data-s="ㅁ겹낫표" data-cho="ㄱㄴㅍ" data-a="" data-u="U+300E U+300F" data-cat="punct-modern" aria-label="겹낫표 ㅁ겹낫표" title="겹낫표 · ㅁ겹낫표 + 스페이스"><span class="gc">『』</span><span class="gs">겹낫표</span></button><button class="g" role="gridcell" data-c="✔" data-n="굵은 체크" data-s="ㅁ굵은체크" data-cho="ㄱㅇ ㅊㅋ" data-a="" data-u="U+2714" data-cat="punct-modern" aria-label="굵은 체크 ㅁ굵은체크" title="굵은 체크 · ㅁ굵은체크 + 스페이스"><span class="gc">✔</span><span class="gs">굵은체크</span></button><button class="g" role="gridcell" data-c="〈〉" data-n="홑화살괄호" data-s="ㅁ꺾쇠" data-cho="ㅎㅎㅅㄱㅎ" data-a="" data-u="U+3008 U+3009" data-cat="punct-modern" aria-label="홑화살괄호 ㅁ꺾쇠" title="홑화살괄호 · ㅁ꺾쇠 + 스페이스"><span class="gc">〈〉</span><span class="gs">꺾쇠</span></button><button class="g" role="gridcell" data-c="⇧" data-n="시프트 키" data-s="ㅁ시프트" data-cho="ㅅㅍㅌ ㅋ" data-a="" data-u="U+21E7" data-cat="punct-modern" aria-label="시프트 키 ㅁ시프트" title="시프트 키 · ㅁ시프트 + 스페이스"><span class="gc">⇧</span><span class="gs">시프트</span></button><button class="g" role="gridcell" data-c="✗" data-n="엑스 표시(벌러트 X)" data-s="ㅁ엑스" data-cho="ㅇㅅ ㅍㅅ(ㅂㄹㅌ X)" data-a="" data-u="U+2717" data-cat="punct-modern" aria-label="엑스 표시(벌러트 X) ㅁ엑스" title="엑스 표시(벌러트 X) · ㅁ엑스 + 스페이스"><span class="gc">✗</span><span class="gs">엑스</span></button><button class="g" role="gridcell" data-c="⌥" data-n="옵션 키" data-s="ㅁ옵션" data-cho="ㅇㅅ ㅋ" data-a="" data-u="U+2325" data-cat="punct-modern" aria-label="옵션 키 ㅁ옵션" title="옵션 키 · ㅁ옵션 + 스페이스"><span class="gc">⌥</span><span class="gs">옵션</span></button><button class="g" role="gridcell" data-c="—" data-n="줄표(엠 대시)" data-s="ㅁ줄표" data-cho="ㅈㅍ(ㅇ ㄷㅅ)" data-a="" data-u="U+2014" data-cat="punct-modern" aria-label="줄표(엠 대시) ㅁ줄표" title="줄표(엠 대시) · ㅁ줄표 + 스페이스"><span class="gc">—</span><span class="gs">줄표</span></button><button class="g" role="gridcell" data-c="☑" data-n="체크된 체크박스" data-s="ㅁ체크박스" data-cho="ㅊㅋㄷ ㅊㅋㅂㅅ" data-a="" data-u="U+2611" data-cat="punct-modern" aria-label="체크된 체크박스 ㅁ체크박스" title="체크된 체크박스 · ㅁ체크박스 + 스페이스"><span class="gc">☑</span><span class="gs">체크박스</span></button><button class="g" role="gridcell" data-c="⌃" data-n="컨트롤 키" data-s="ㅁ컨트롤" data-cho="ㅋㅌㄹ ㅋ" data-a="" data-u="U+2303" data-cat="punct-modern" aria-label="컨트롤 키 ㅁ컨트롤" title="컨트롤 키 · ㅁ컨트롤 + 스페이스"><span class="gc">⌃</span><span class="gs">컨트롤</span></button><button class="g" role="gridcell" data-c="▸" data-n="작은 오른쪽 삼각형" data-s="ㅁ토글" data-cho="ㅈㅇ ㅇㄹㅉ ㅅㄱㅎ" data-a="" data-u="U+25B8" data-cat="punct-modern" aria-label="작은 오른쪽 삼각형 ㅁ토글" title="작은 오른쪽 삼각형 · ㅁ토글 + 스페이스"><span class="gc">▸</span><span class="gs">토글</span></button><button class="g" role="gridcell" data-c="☐" data-n="빈 체크박스" data-s="ㅁ빈박스" data-cho="ㅂ ㅊㅋㅂㅅ" data-a="" data-u="U+2610" data-cat="punct-modern" aria-label="빈 체크박스 ㅁ빈박스" title="빈 체크박스 · ㅁ빈박스 + 스페이스"><span class="gc">☐</span><span class="gs">빈박스</span></button><button class="g" role="gridcell" data-c="–" data-n="엔 대시" data-s="ㅁ엔대시" data-cho="ㅇ ㄷㅅ" data-a="" data-u="U+2013" data-cat="punct-modern" aria-label="엔 대시 ㅁ엔대시" title="엔 대시 · ㅁ엔대시 + 스페이스"><span class="gc">–</span><span class="gs">엔대시</span></button></div></div><div class="sec" data-cat="combo"><div class="lbl" role="button" tabindex="-1" aria-expanded="true"><span class="dot" style="background:var(--c4)"></span><span class="lbl-t">조합</span><span class="lbl-n">6</span></div><div class="row" role="row"><button class="g long" role="gridcell" data-c="★☆☆☆☆" data-n="별점 1점" data-s="ㅁ별점1" data-cho="ㅂㅈ 1ㅈ" data-a="" data-u="U+2605 U+2606 U+2606 U+2606 U+2606" data-cat="combo" aria-label="별점 1점 ㅁ별점1" title="별점 1점 · ㅁ별점1 + 스페이스"><span class="gc">★☆☆☆☆</span><span class="gs">별점1</span></button><button class="g long" role="gridcell" data-c="★★☆☆☆" data-n="별점 2점" data-s="ㅁ별점2" data-cho="ㅂㅈ 2ㅈ" data-a="" data-u="U+2605 U+2605 U+2606 U+2606 U+2606" data-cat="combo" aria-label="별점 2점 ㅁ별점2" title="별점 2점 · ㅁ별점2 + 스페이스"><span class="gc">★★☆☆☆</span><span class="gs">별점2</span></button><button class="g long" role="gridcell" data-c="★★★☆☆" data-n="별점 3점" data-s="ㅁ별점3" data-cho="ㅂㅈ 3ㅈ" data-a="" data-u="U+2605 U+2605 U+2605 U+2606 U+2606" data-cat="combo" aria-label="별점 3점 ㅁ별점3" title="별점 3점 · ㅁ별점3 + 스페이스"><span class="gc">★★★☆☆</span><span class="gs">별점3</span></button><button class="g long" role="gridcell" data-c="★★★★☆" data-n="별점 4점" data-s="ㅁ별점4" data-cho="ㅂㅈ 4ㅈ" data-a="" data-u="U+2605 U+2605 U+2605 U+2605 U+2606" data-cat="combo" aria-label="별점 4점 ㅁ별점4" title="별점 4점 · ㅁ별점4 + 스페이스"><span class="gc">★★★★☆</span><span class="gs">별점4</span></button><button class="g long" role="gridcell" data-c="★★★★★" data-n="별점 5점" data-s="ㅁ별점5" data-cho="ㅂㅈ 5ㅈ" data-a="" data-u="U+2605 U+2605 U+2605 U+2605 U+2605" data-cat="combo" aria-label="별점 5점 ㅁ별점5" title="별점 5점 · ㅁ별점5 + 스페이스"><span class="gc">★★★★★</span><span class="gs">별점5</span></button><button class="g long" role="gridcell" data-c="【이노하이】" data-n="이노하이 말머리" data-s="ㅁ이노하이" data-cho="ㅇㄴㅎㅇ ㅁㅁㄹ" data-a="" data-u="U+3010 U+C774 U+B178 U+D558 U+C774 U+3011" data-cat="combo" aria-label="이노하이 말머리 ㅁ이노하이" title="이노하이 말머리 · ㅁ이노하이 + 스페이스"><span class="gc">【이노하이】</span><span class="gs">이노하이</span></button></div></div>
+  <div id="empty">
+    <div id="empty-msg">검색 결과가 없어요</div>
+    <div class="sug" id="empty-sug"></div>
+  </div>
   <div class="status" id="status">기호를 누르면 커서 위치에 바로 입력돼요 · ⌘클릭은 복사만 해요</div>
+</div>
+<div id="toast"></div>
+<div id="help">
+  <h3>단축키</h3>
+  <table>
+    <tr><td>←→↑↓</td><td>이동 (가장자리에서 반대편으로 넘어감)</td></tr>
+    <tr><td>Tab / ⇧Tab</td><td>다음 / 이전 항목</td></tr>
+    <tr><td>Home / End</td><td>맨 처음 / 맨 끝</td></tr>
+    <tr><td>PageUp / PageDown</td><td>한 화면씩</td></tr>
+    <tr><td>Enter</td><td>커서 위치에 입력하고 닫기</td></tr>
+    <tr><td>⌘Enter</td><td>복사만 하고 닫기</td></tr>
+    <tr><td>⇧Enter</td><td>입력하고 <b>닫지 않기</b> (연속 입력)</td></tr>
+    <tr><td>⌥Enter</td><td>기호 이름을 복사</td></tr>
+    <tr><td>⌃Enter</td><td>즐겨찾기 토글</td></tr>
+    <tr><td>⌥1…9</td><td>해당 섹션으로 점프</td></tr>
+    <tr><td>⌃1…9</td><td>현재 목록의 N번째를 바로 입력</td></tr>
+    <tr><td>⌥↑ / ⌥↓</td><td>이전에 쓴 검색어</td></tr>
+    <tr><td>⌘⌫</td><td>검색어 지우기</td></tr>
+    <tr><td>Esc</td><td>검색어가 있으면 지우기, 없으면 닫기</td></tr>
+    <tr><td>?</td><td>이 도움말</td></tr>
+    <tr><td>클릭</td><td>입력 · ⌘클릭 복사만 · ⇧클릭 연속 · ⌃클릭 즐겨찾기</td></tr>
+  </table>
+  <div class="ver">특수문자 팔레트 v1.1.0 · 아무 키나 누르면 닫힙니다</div>
 </div>
 <script>
 "use strict";
+const CFG = {"hotkey": {"mods": ["alt"], "key": "space"}, "palette": {"width": 760, "height": 660, "maxRecent": 10, "showShortcutBadge": false, "fontScale": 1.0, "highContrast": false, "wrapArrows": true, "rememberScroll": true}, "input": {"pasteThreshold": 4, "restoreClipboard": true, "inputDelay": 0.15}, "privacy": {"excludePersonalFromRecent": true}, "display": {"followMouse": true, "fade": true}};
+const P = (CFG && CFG.palette) || {};
+const PRIV = (CFG && CFG.privacy) || {};
+
 function post(m) {
   try { window.webkit.messageHandlers.palette.postMessage(m); } catch (e) {}
 }
-function pick(b, cmd) { post({ action: "pick", char: b.dataset.c, cmd: !!cmd }); }
+
+/* ---------------- 상태: lua(hs.settings)에 저장한다 -------------------
+   Hammerspoon webview는 localStorage 보존을 보장하지 않아서, 영속 상태는
+   전부 브릿지로 lua에 넘겨 hs.settings에 둔다. (#50,58,27,47) */
+let STATE = { fav: [], collapsed: [], theme: "", size: "", badge: 0, history: [], scroll: 0 };
+let ready = false;
+function save() { if (ready) post({ action: "state", state: STATE }); }
+
+const root = document.documentElement;
+function applyPrefs() {
+  root.dataset.theme = STATE.theme || "";
+  root.dataset.size = STATE.size || "";
+  root.dataset.badge = STATE.badge ? "1" : "0";
+  root.dataset.contrast = P.highContrast ? "high" : "";
+}
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const q = $("#q"), statusEl = $("#status"), panel = $("#panel");
+const emptyEl = $("#empty"), emptyMsg = $("#empty-msg"), emptySug = $("#empty-sug");
+
+/* ---------------- 토스트 (#52) ---------------- */
+let toastT = null;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("on"), 1100);
+}
+
+/* ---------------- 동작 ---------------- */
+const GEN = ".sec:not(#recent-sec):not(#fav-sec):not(#top-sec)";
+function srcButtons() { return $$(GEN + " button.g"); }
+function byChar(ch) { return srcButtons().find(b => b.dataset.c === ch); }
+
+function pick(b, mode) {
+  if (!b) return;
+  if (mode === "fav") { toggleFav(b); return; }
+  if (mode === "name") { post({ action: "copyName", name: b.dataset.n }); toast("이름 복사: " + b.dataset.n); return; }
+  post({ action: "pick", char: b.dataset.c, cmd: mode === "copy", keep: mode === "keep",
+         cat: b.dataset.cat });
+  if (mode === "keep") toast("입력: " + b.dataset.c);
+}
+
+/* 즐겨찾기 (#47) */
+function toggleFav(b) {
+  const ch = b.dataset.c;
+  const i = STATE.fav.indexOf(ch);
+  if (i >= 0) { STATE.fav.splice(i, 1); toast("즐겨찾기 해제"); }
+  else { STATE.fav.unshift(ch); toast("즐겨찾기 추가"); }
+  save(); renderFav(); markFav();
+}
+function markFav() {
+  const set = new Set(STATE.fav);
+  $$("button.g").forEach(b => {
+    if (set.has(b.dataset.c)) b.dataset.fav = "1"; else delete b.dataset.fav;
+  });
+}
+function fillRow(rowId, secId, nId, chars, limit) {
+  const row = $(rowId), sec = $(secId);
+  row.innerHTML = "";
+  const seen = new Set();
+  (chars || []).forEach(ch => {
+    if (seen.has(ch) || row.children.length >= limit) return;
+    seen.add(ch);
+    const src = byChar(ch);
+    if (!src) return;
+    const c = src.cloneNode(true);
+    // 최근/즐겨찾기 줄에서는 긴 항목을 축약해 한 칸만 차지하게 (#46)
+    if (c.classList.contains("long")) {
+      c.classList.remove("long");
+      const g = c.querySelector(".gc");
+      if (g) { g.textContent = src.dataset.s.slice(1); g.style.fontSize = "11px"; }
+    }
+    row.appendChild(c);
+  });
+  if (nId) $(nId).textContent = row.children.length;
+  sec.hidden = row.children.length === 0;
+}
+function renderFav() { fillRow("#fav-row", "#fav-sec", "#fav-n", STATE.fav, 12); }
+
+/* 클릭: 기본=입력 · ⌘=복사만 · ⇧=연속 · ⌃=즐겨찾기 (#35,47) */
 document.addEventListener("click", ev => {
+  const lbl = ev.target.closest(".lbl");
+  if (lbl) { toggleSec(lbl.closest(".sec")); return; }
   const b = ev.target.closest("button.g");
-  if (b) { pick(b, ev.metaKey); return; }
-  if (ev.target.closest("#x")) post({ action: "close" });
+  if (b) {
+    pick(b, ev.ctrlKey ? "fav" : ev.metaKey ? "copy" : ev.shiftKey ? "keep" : "input");
+    return;
+  }
+  if (ev.target.closest("#qx")) { q.value = ""; filter(); q.focus(); return; }
+  if (ev.target.closest("#t-theme")) { cycleTheme(); return; }
+  if (ev.target.closest("#t-size")) { cycleSize(); return; }
+  if (ev.target.closest("#t-badge")) { STATE.badge = STATE.badge ? 0 : 1; applyPrefs(); save(); return; }
+  if (ev.target.closest("#x")) { post({ action: "close" }); return; }
+  if (ev.target.closest("#help")) { $("#help").classList.remove("on"); return; }
 });
-const statusEl = document.getElementById("status");
+
+function cycleTheme() {
+  STATE.theme = STATE.theme === "" ? "light" : STATE.theme === "light" ? "dark" : "";
+  applyPrefs(); save();
+  toast("테마: " + (STATE.theme || "시스템"));
+}
+function cycleSize() {
+  STATE.size = STATE.size === "" ? "l" : STATE.size === "l" ? "s" : "";
+  applyPrefs(); save();
+  toast("글자: " + (STATE.size === "l" ? "크게" : STATE.size === "s" ? "작게" : "보통"));
+}
+
+/* 섹션 접기 (#49,50) */
+function toggleSec(sec) {
+  if (!sec) return;
+  const cat = sec.dataset.cat || sec.id;
+  const on = sec.dataset.collapsed === "1";
+  sec.dataset.collapsed = on ? "0" : "1";
+  sec.querySelector(".lbl").setAttribute("aria-expanded", on ? "true" : "false");
+  const i = STATE.collapsed.indexOf(cat);
+  if (on && i >= 0) STATE.collapsed.splice(i, 1);
+  else if (!on && i < 0) STATE.collapsed.push(cat);
+  save(); refreshSel();
+}
+function applyCollapsed() {
+  $$(".sec").forEach(sec => {
+    const cat = sec.dataset.cat || sec.id;
+    const on = STATE.collapsed.includes(cat);
+    sec.dataset.collapsed = on ? "1" : "0";
+    const l = sec.querySelector(".lbl");
+    if (l) l.setAttribute("aria-expanded", on ? "false" : "true");
+  });
+}
+
+/* 상태줄 (#59) — 마우스 올린 항목 정보 + 검색어 하이라이트 (#16) */
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function hl(text, terms) {
+  let out = esc(text);
+  terms.filter(t => t && /[a-z0-9가-힣]/i.test(t)).forEach(t => {
+    const re = new RegExp("(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig");
+    out = out.replace(re, "<mark>$1</mark>");
+  });
+  return out;
+}
+function describe(b) {
+  const terms = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const al = b.dataset.a ? "  ·  " + esc(b.dataset.a) : "";
+  statusEl.innerHTML = "<b>" + esc(b.dataset.c) + "</b>  " + hl(b.dataset.n, terms)
+    + "  ·  " + hl(b.dataset.s, terms) + " + 스페이스" + al;
+}
 document.addEventListener("mouseover", ev => {
   const b = ev.target.closest("button.g");
-  if (b) statusEl.innerHTML = "<b>" + b.dataset.c + "</b>  " + b.dataset.n + "  ·  " + b.dataset.s + " + 스페이스";
+  if (b) describe(b);
 });
-const q = document.getElementById("q");
-function visibleButtons() {
-  return [...document.querySelectorAll(".sec:not([hidden]) button.g")].filter(b => b.style.display !== "none");
+
+/* ---------------- 검색 (#15,19,20,21,22,23,29,30) ---------------- */
+function score(b, tokens) {
+  const name = b.dataset.n.toLowerCase();
+  const sc = b.dataset.s.toLowerCase();
+  const ch = b.dataset.c.toLowerCase();
+  const al = (b.dataset.a || "").toLowerCase();
+  const uni = (b.dataset.u || "").toLowerCase();
+  const cho = b.dataset.cho || "";
+  let total = 0;
+  for (const t of tokens) {
+    let s = 0;
+    if (sc === t || sc === "ㅁ" + t) s = 1000;          // 단축어 정확 일치 (#21)
+    else if (ch === t) s = 900;
+    else if (name === t) s = 800;
+    else if (al.split(/\s+/).includes(t)) s = 700;      // 영문 별칭 (#15)
+    else if (sc.startsWith(t) || sc.slice(1).startsWith(t)) s = 600;
+    else if (name.startsWith(t)) s = 500;
+    else if (/^[ㄱ-ㅎ]+$/.test(t) && cho.includes(t)) s = 400;   // 초성 (#20)
+    else if (uni.includes(t.toUpperCase()) || uni.includes(t)) s = 350;  // U+XXXX (#22)
+    else if (name.includes(t)) s = 300;
+    else if (al.includes(t)) s = 250;
+    else if (sc.includes(t)) s = 200;
+    else return -1;                                      // 한 토큰이라도 못 맞추면 탈락
+    total += s;
+  }
+  return total;
 }
+let filterT = null;
 function filter() {
   const raw = q.value.trim().toLowerCase();
   const tokens = raw ? raw.split(/\s+/) : [];
-  document.querySelectorAll("button.g").forEach(b => {
-    const k = (b.dataset.c + " " + b.dataset.n + " " + b.dataset.s).toLowerCase();
-    const hit = !tokens.length || tokens.every(t =>
-      k.includes(t) || (/^[ㄱ-ㅎ]+$/.test(t) && b.dataset.cho.includes(t)));
-    b.style.display = hit ? "" : "none";
+  let shown = 0;
+  const ranked = [];
+  srcButtons().forEach(b => {
+    if (!tokens.length) { b.style.display = ""; b.style.order = ""; shown++; return; }
+    const s = score(b, tokens);
+    if (s < 0) { b.style.display = "none"; return; }
+    b.style.display = "";
+    b.style.order = String(-s);        // 점수 높을수록 앞 (#23)
+    ranked.push([s, b]);
+    shown++;
   });
-  document.querySelectorAll(".sec").forEach(sec => {
-    if (sec.id === "recent-sec" && sec.hidden) return;
+  // 특수 줄(즐겨찾기·최근·자주)은 검색 중에는 감춘다 (#18)
+  ["#fav-sec", "#recent-sec", "#top-sec"].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    if (tokens.length) el.style.display = "none";
+    else el.style.display = el.hidden ? "none" : "";
+  });
+  $$(GEN).forEach(sec => {
     const any = [...sec.querySelectorAll("button.g")].some(b => b.style.display !== "none");
-    sec.style.display = any ? "" : "none";
+    sec.style.display = any ? "" : "none";     // 빈 섹션 숨김 (#51)
   });
-  refreshSel();
+  // 결과 개수 (#19) / 빈 결과 + 제안 (#17,29)
+  if (tokens.length) {
+    $("#hint").textContent = shown + "개 찾음";
+    if (!shown) showEmpty(raw); else emptyEl.classList.remove("on");
+  } else {
+    $("#hint").textContent = "←→↑↓ 이동 · Enter 입력 · ⌘=복사만 · ? 도움말";
+    emptyEl.classList.remove("on");
+  }
+  refreshSel(true);
 }
-q.addEventListener("input", filter);
-// ---- 키보드 커서: 파란 테두리로 현재 위치, 방향키 이동, Enter 입력 ----
+q.addEventListener("input", () => {          // 디바운스 (#30)
+  clearTimeout(filterT);
+  filterT = setTimeout(filter, 40);
+});
+
+/* 결과 없을 때 가까운 항목 제안 (#29) — 편집거리 대신 문자 겹침으로 가볍게 */
+function showEmpty(raw) {
+  emptyMsg.textContent = "‘" + raw + "’ 에 맞는 기호가 없어요";
+  const want = new Set(raw);
+  const cand = srcButtons().map(b => {
+    const n = b.dataset.n.toLowerCase() + " " + (b.dataset.a || "").toLowerCase();
+    let hit = 0;
+    want.forEach(c => { if (n.includes(c)) hit++; });
+    return [hit / Math.max(1, want.size), b];
+  }).filter(x => x[0] >= 0.5).sort((a, b) => b[0] - a[0]).slice(0, 6);
+  emptySug.innerHTML = "";
+  cand.forEach(([, b]) => {
+    const el = document.createElement("button");
+    el.textContent = b.dataset.c + " " + b.dataset.n;
+    el.onclick = () => { q.value = b.dataset.n; filter(); q.focus(); };
+    emptySug.appendChild(el);
+  });
+  emptyEl.classList.add("on");
+}
+
+/* ---------------- 키보드 커서 ---------------- */
 let sel = null;
 function focusables() {
-  return [...document.querySelectorAll(".sec:not([hidden]) button.g")]
-    .filter(el => el.offsetParent !== null && el.style.display !== "none");
+  return $$(".sec:not([hidden]) button.g").filter(el =>
+    el.offsetParent !== null && el.style.display !== "none");
 }
 function setSel(el) {
   if (sel && sel !== el) sel.classList.remove("sel");
   sel = el || null;
-  if (sel) { sel.classList.add("sel"); sel.scrollIntoView({ block: "nearest" }); }
+  if (sel) {
+    sel.classList.add("sel");
+    sel.scrollIntoView({ block: "nearest" });   // (#39)
+    describe(sel);
+  }
 }
-function refreshSel() {
+function refreshSel(auto) {
   const items = focusables();
   if (!items.length) { if (sel) { sel.classList.remove("sel"); sel = null; } return; }
-  if (!sel || !items.includes(sel)) setSel(items[0]);
+  // 검색 후에는 1등을 자동 선택 (#24)
+  if (auto || !sel || !items.includes(sel)) setSel(items[0]);
 }
 function colsOf(el) {
   const grid = el.parentElement;
@@ -149,52 +499,128 @@ function colsOf(el) {
   for (const k of kids) { if (k.offsetTop === top0) n++; else break; }
   return Math.max(1, n);
 }
-function navSel(dir) {
+function navSel(dir, big) {
   const items = focusables();
   if (!items.length) return;
   let i = sel ? items.indexOf(sel) : -1;
   if (i < 0) { setSel(items[0]); return; }
+  const cols = colsOf(items[i]);
   let ni = i;
   if (dir === "right") ni = i + 1;
   else if (dir === "left") ni = i - 1;
-  else if (dir === "down") ni = i + colsOf(items[i]);
-  else if (dir === "up") ni = i - colsOf(items[i]);
-  if (ni < 0) ni = 0;
-  if (ni >= items.length) ni = items.length - 1;
+  else if (dir === "down") ni = i + (big ? cols * 4 : cols);
+  else if (dir === "up") ni = i - (big ? cols * 4 : cols);
+  else if (dir === "home") ni = 0;
+  else if (dir === "end") ni = items.length - 1;
+  // 가장자리에서 반대편으로 (#38)
+  const wrap = P.wrapArrows !== false;
+  if (ni < 0) ni = wrap && (dir === "left") ? items.length - 1 : 0;
+  if (ni >= items.length) ni = wrap && (dir === "right") ? 0 : items.length - 1;
   setSel(items[ni]);
 }
-function activate(el, cmd) {
-  if (!el) return;
-  if (el.matches("button.g")) pick(el, cmd);
-  else el.click();
+function jumpSection(n) {                       // ⌥1~9 (#34)
+  const secs = $$(".sec").filter(s => !s.hidden && s.style.display !== "none");
+  const sec = secs[n - 1];
+  if (!sec) return;
+  const b = [...sec.querySelectorAll("button.g")].find(x => x.style.display !== "none");
+  if (b) { setSel(b); sec.scrollIntoView({ block: "start" }); toast(sec.querySelector(".lbl-t").textContent); }
 }
+
+/* 검색어 히스토리 (#27,28) */
+let hIdx = -1;
+function pushHistory(v) {
+  v = v.trim();
+  if (!v) return;
+  STATE.history = [v, ...STATE.history.filter(x => x !== v)].slice(0, 20);
+  save();
+}
+function histStep(d) {
+  if (!STATE.history.length) return;
+  hIdx = Math.max(-1, Math.min(STATE.history.length - 1, hIdx + d));
+  q.value = hIdx < 0 ? "" : STATE.history[hIdx];
+  filter();
+}
+
 document.addEventListener("keydown", ev => {
-  if (ev.isComposing || ev.keyCode === 229) return;
-  if (ev.key === "Escape") { ev.preventDefault(); post({ action: "close" }); return; }
-  if (ev.key === "Enter") { ev.preventDefault(); activate(sel || focusables()[0], ev.metaKey); return; }
-  if (ev.key === "ArrowRight") { ev.preventDefault(); navSel("right"); return; }
-  if (ev.key === "ArrowLeft") { ev.preventDefault(); navSel("left"); return; }
-  if (ev.key === "ArrowDown") { ev.preventDefault(); navSel("down"); return; }
-  if (ev.key === "ArrowUp") { ev.preventDefault(); navSel("up"); return; }
+  if (ev.isComposing || ev.keyCode === 229) return;    // IME 조합 중 (#44)
+  const help = $("#help");
+  if (help.classList.contains("on")) { ev.preventDefault(); help.classList.remove("on"); return; }
+  const k = ev.key;
+
+  if (k === "?" && !q.value) { ev.preventDefault(); help.classList.add("on"); return; }
+  if (ev.metaKey && k === "Backspace") { ev.preventDefault(); q.value = ""; filter(); return; }  // (#26)
+  if (ev.altKey && (k === "ArrowUp" || k === "ArrowDown")) {                                     // (#28)
+    ev.preventDefault(); histStep(k === "ArrowUp" ? 1 : -1); return;
+  }
+  if (ev.altKey && /^[1-9]$/.test(k)) { ev.preventDefault(); jumpSection(+k); return; }
+  if (ev.ctrlKey && /^[1-9]$/.test(k)) {                                                          // (#37)
+    ev.preventDefault();
+    const b = focusables()[+k - 1];
+    if (b) pick(b, "input");
+    return;
+  }
+  if (k === "Escape") {                                                                           // (#40)
+    ev.preventDefault();
+    if (q.value) { q.value = ""; filter(); q.focus(); }
+    else post({ action: "close" });
+    return;
+  }
+  if (k === "Enter") {
+    ev.preventDefault();
+    const b = sel || focusables()[0];
+    if (!b) return;
+    pushHistory(q.value);
+    pick(b, ev.ctrlKey ? "fav" : ev.metaKey ? "copy" : ev.shiftKey ? "keep" : ev.altKey ? "name" : "input");
+    return;
+  }
+  if (k === "Tab") { ev.preventDefault(); navSel(ev.shiftKey ? "left" : "right"); return; }        // (#31)
+  if (k === "Home") { ev.preventDefault(); navSel("home"); return; }                               // (#32)
+  if (k === "End") { ev.preventDefault(); navSel("end"); return; }
+  if (k === "PageDown") { ev.preventDefault(); navSel("down", true); return; }                     // (#33)
+  if (k === "PageUp") { ev.preventDefault(); navSel("up", true); return; }
+  if (k === "ArrowRight") { ev.preventDefault(); navSel("right"); return; }
+  if (k === "ArrowLeft") { ev.preventDefault(); navSel("left"); return; }
+  if (k === "ArrowDown") { ev.preventDefault(); navSel("down"); return; }
+  if (k === "ArrowUp") { ev.preventDefault(); navSel("up"); return; }
 });
+// 포커스 트랩 (#42) — 검색창 밖으로 포커스가 새지 않게
+document.addEventListener("focusin", ev => {
+  if (ev.target !== q && !ev.target.closest(".tools") && !ev.target.closest("#empty")) q.focus();
+});
+
+/* 스크롤 위치 기억 (#58) */
+let scrollT = null;
+panel.addEventListener("scroll", () => {
+  if (P.rememberScroll === false) return;
+  clearTimeout(scrollT);
+  scrollT = setTimeout(() => { STATE.scroll = panel.scrollTop; save(); }, 250);
+});
+
+/* ---------------- lua → JS 진입점 ---------------- */
+window.setState = function (s) {
+  STATE = Object.assign(STATE, s || {});
+  ["fav", "collapsed", "history"].forEach(k => { if (!Array.isArray(STATE[k])) STATE[k] = []; });
+  ready = true;
+  applyPrefs(); applyCollapsed(); renderFav(); markFav();
+};
 window.setRecent = function (chars) {
-  const sec = document.getElementById("recent-sec");
-  const row = document.getElementById("recent-row");
-  row.innerHTML = "";
-  const seen = new Set();
-  (chars || []).slice(0, 10).forEach(ch => {
-    if (seen.has(ch)) return;
-    seen.add(ch);
-    const src = [...document.querySelectorAll(".sec:not(#recent-sec) button.g")].find(b => b.dataset.c === ch);
-    if (src) row.appendChild(src.cloneNode(true));
-  });
-  sec.hidden = row.children.length === 0;
+  fillRow("#recent-row", "#recent-sec", "#recent-n", chars, P.maxRecent || 10);
+  markFav();
+  refreshSel();
+};
+window.setTop = function (chars) {              // 자주 쓰는 (#48)
+  fillRow("#top-row", "#top-sec", "#top-n", chars, 12);
+  markFav();
   refreshSel();
 };
 window.resetAndFocus = function () {
   q.value = "";
+  hIdx = -1;
   filter();
   q.focus();
+  if (P.rememberScroll !== false && STATE.scroll) panel.scrollTop = STATE.scroll;
 };
+applyPrefs();
+filter();
 </script>
 </body></html>

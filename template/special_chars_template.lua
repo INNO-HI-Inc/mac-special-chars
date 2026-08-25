@@ -7,12 +7,12 @@
 -- UI 수정: template/palette_template.html (재빌드 시 덮어써짐)
 -- ============================================================
 
-local CFG = hs.json.decode([[{"hotkey": {"mods": ["alt"], "key": "space"}, "palette": {"width": 760, "height": 660, "maxRecent": 10, "showShortcutBadge": false, "fontScale": 1.0, "highContrast": false, "wrapArrows": true, "rememberScroll": true}, "input": {"pasteThreshold": 4, "restoreClipboard": true, "inputDelay": 0.15}, "privacy": {"excludePersonalFromRecent": true}, "display": {"followMouse": true, "fade": true}}]]) or {}
+local CFG = hs.json.decode([[@@CONFIG@@]]) or {}
 local PAL = CFG.palette or {}
 local INP = CFG.input or {}
 local PRIV = CFG.privacy or {}
 local DISP = CFG.display or {}
-local VERSION = "1.1.0"
+local VERSION = "@@VERSION@@"
 
 local CHAR_COUNT = 0        -- loadHtml에서 실제 버튼 수로 채워진다
 
