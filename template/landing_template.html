@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ㅁ 특수문자 단축어 — 맥에서 윈도우 한자키처럼</title>
+<meta name="description" content="맥 어디서든 ㅁ별 + 스페이스 → ★. 텍스트 대치 파일 하나로 특수문자 @@COUNT@@개를 바로 입력하세요. 무료 · 오픈소스.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="ㅁ 특수문자 단축어 — 맥에서 윈도우 한자키처럼">
+<meta property="og:description" content="맥 어디서든 ㅁ별 + 스페이스 → ★. 특수문자 @@COUNT@@개, 설치 1분.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233182F6'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E3%85%81%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --ink: #191F28;
+  --sub: #6B7684;
+  --card: #F7F8FA;
+  --line: #E5E8EB;
+  --accent: #3182F6;
+  --on-accent: #FFFFFF;
+  --accent-weak: #E8F3FF;
+  --chip: #F2F4F6;
+  --raise: #FFFFFF;
+  --code-bg: #16181D;
+  --code-ink: #E7E9EC;
+  --shadow: 0 10px 30px -18px rgba(0,0,0,.4);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111114;
+    --ink: #E7E9EC;
+    --sub: #8B95A1;
+    --card: #1C1C22;
+    --line: #2A2A32;
+    --accent: #4593FC;
+    --accent-weak: #1B3050;
+    --chip: #26262E;
+    --raise: #2E2E37;
+    --code-bg: #08090B;
+    --shadow: 0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); margin: 0; line-height: 1.6;
+  font-family: "Apple SD Gothic Neo", -apple-system, "Pretendard", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 100px; }
+
+/* ---------- 히어로 ---------- */
+.hero { padding: 72px 0 8px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  background: var(--accent-weak); border-radius: 99px; padding: 6px 14px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(32px, 6.2vw, 52px); font-weight: 800; letter-spacing: -0.035em;
+  line-height: 1.2; margin: 0 0 18px; text-wrap: balance;
+}
+.hero h1 .hl { color: var(--accent); }
+.hero .lede {
+  font-size: clamp(15px, 2.2vw, 18px); color: var(--sub);
+  margin: 0 0 30px; max-width: 52ch; text-wrap: pretty;
+}
+
+/* 타이핑 데모 */
+.demo {
+  background: var(--card); border-radius: 20px; padding: 26px 28px;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  margin-bottom: 28px; min-height: 104px;
+}
+.demo .lbl { font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: .02em; }
+.demo .stage {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -0.02em;
+}
+.demo .typed {
+  background: var(--raise); border-radius: 12px; padding: 6px 16px;
+  box-shadow: var(--shadow); min-width: 3.4em; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.demo .caret {
+  display: inline-block; width: 2px; height: .95em; vertical-align: -.1em;
+  background: var(--accent); margin-left: 2px; animation: blink 1s step-end infinite;
+}
+.demo .arrow { color: var(--sub); font-size: .7em; }
+.demo .out { font-size: 1.25em; }
+.demo .spacebar {
+  font-size: 12px; font-weight: 700; color: var(--sub);
+  border: 1px solid var(--line); border-radius: 8px; padding: 3px 14px;
+  background: var(--raise);
+}
+.demo .spacebar.hit { background: var(--accent); color: #fff; border-color: transparent; }
+@keyframes blink { 50% { opacity: 0 } }
+
+/* CTA */
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+  border-radius: 14px; padding: 14px 24px; border: none; cursor: pointer;
+  background: var(--chip); color: var(--ink);
+  transition: transform .1s ease, background .12s ease;
+}
+.btn:active { transform: scale(.975); }
+.btn.primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 8px 20px -10px var(--accent); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn:hover { background: var(--accent-weak); }
+.btn.primary .sz { font-weight: 500; opacity: .82; font-size: 13px; }
+.meta { font-size: 13px; color: var(--sub); }
+.meta b { color: var(--ink); font-weight: 700; }
+
+/* ---------- 섹션 ---------- */
+section { margin-top: 72px; }
+section > h2 {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 6px;
+}
+section > .sub { color: var(--sub); font-size: 14px; margin: 0 0 24px; }
+
+/* 설치 스텝 */
+.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; display: grid; gap: 12px; }
+.steps li {
+  counter-increment: s; position: relative;
+  background: var(--card); border-radius: 18px; padding: 20px 24px 20px 66px;
+}
+.steps li::before {
+  content: counter(s); position: absolute; left: 22px; top: 20px;
+  width: 28px; height: 28px; border-radius: 99px;
+  background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.steps h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.02em; }
+.steps p { margin: 0; font-size: 14px; color: var(--sub); }
+.steps p b { color: var(--ink); }
+.steps .inline-dl {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+  font-size: 13px; font-weight: 700; text-decoration: none;
+  background: var(--accent-weak); color: var(--accent);
+  border-radius: 10px; padding: 7px 14px;
+}
+.path {
+  font-size: 13px; font-weight: 600; background: var(--chip);
+  border-radius: 7px; padding: 1px 7px; white-space: nowrap;
+}
+
+/* 기호 미리보기 */
+.symbols { display: grid; grid-template-columns: repeat(auto-fill, minmax(94px, 1fr)); gap: 8px; }
+.sym {
+  background: var(--card); border: none; border-radius: 14px;
+  padding: 14px 6px 10px; cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: transform .1s ease, background .12s ease;
+}
+.sym:hover { background: var(--accent-weak); }
+.sym:active { transform: scale(.95); }
+.sym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sym .g { font-size: 26px; line-height: 1.15; }
+.sym .s { font-size: 11.5px; color: var(--sub); font-weight: 600; }
+.more { display: inline-block; margin-top: 18px; font-size: 14px; font-weight: 700; text-decoration: none; }
+
+/* 팔레트 */
+.shot {
+  display: block; width: 100%; height: auto; border-radius: 18px;
+  border: 1px solid var(--line); margin: 0 0 20px; background: var(--card);
+}
+.code {
+  background: var(--code-bg); color: var(--code-ink);
+  border-radius: 16px; padding: 18px 20px; margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px; line-height: 1.85; overflow-x: auto;
+  position: relative;
+}
+.code .c { color: #8B95A1; }
+.copy-code {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 12px; font-weight: 700; color: #E7E9EC;
+  background: rgba(255,255,255,.12); border: none; border-radius: 8px;
+  padding: 5px 11px; cursor: pointer;
+}
+.copy-code:hover { background: rgba(255,255,255,.22); }
+.code-wrap { position: relative; }
+
+/* 표 */
+.keys { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 18px; }
+.keys td { padding: 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.keys td:first-child { width: 132px; }
+.keys .k {
+  font-size: 12.5px; font-weight: 700; background: var(--chip);
+  border-radius: 7px; padding: 2px 8px; white-space: nowrap;
+}
+
+/* FAQ */
+details {
+  background: var(--card); border-radius: 16px; padding: 16px 20px; margin-bottom: 8px;
+}
+details summary {
+  font-size: 15px; font-weight: 700; cursor: pointer; list-style: none;
+  display: flex; align-items: center; letter-spacing: -0.01em;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::after {
+  content: "+"; margin-left: auto; color: var(--sub); font-weight: 500; font-size: 19px;
+}
+details[open] summary::after { content: "−"; }
+details p { font-size: 14px; color: var(--sub); margin: 12px 0 2px; }
+details code {
+  font-size: 12.5px; background: var(--chip); border-radius: 6px; padding: 1px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+footer {
+  margin-top: 76px; padding-top: 28px; border-top: 1px solid var(--line);
+  font-size: 13px; color: var(--sub);
+  display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+}
+footer a { font-weight: 600; text-decoration: none; }
+footer .sp { flex: 1; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px);
+  background: var(--ink); color: var(--bg);
+  font-size: 14px; font-weight: 600; border-radius: 12px; padding: 11px 20px;
+  opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+  z-index: 50;
+}
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+@media (max-width: 560px) {
+  .hero { padding-top: 48px; }
+  .btn { flex: 1 1 100%; justify-content: center; }
+  .keys td:first-child { width: 104px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">윈도우 <b>ㅁ + 한자키</b>, 맥에도 있습니다</div>
+    <h1>특수문자, <span class="hl">단축어 + 스페이스</span>로 끝.</h1>
+    <p class="lede">맥 어디서든 한글 모드에서 <b>ㅁ별</b> 치고 스페이스를 누르면 <b>★</b>이 됩니다.
+    설치는 파일 하나 드래그, 1분이면 끝나요.</p>
+
+    <div class="demo" aria-hidden="true">
+      <div>
+        <div class="lbl">이렇게 됩니다</div>
+        <div class="stage">
+          <span class="typed"><span id="d-in"></span><span class="caret"></span></span>
+          <span class="spacebar" id="d-space">space</span>
+          <span class="arrow">▶</span>
+          <span class="out" id="d-out"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <a class="btn primary" href="@@PLIST@@" download="특수문자_텍스트대치.plist" id="dl">
+        텍스트 대치 파일 받기 <span class="sz">.plist · @@PLIST_KB@@KB</span>
+      </a>
+      <a class="btn" href="cheatsheet.html">치트시트 열어보기 →</a>
+    </div>
+    <p class="meta">macOS 전용 · 기호 <b>@@COUNT@@개</b> · v@@VERSION@@ · 무료 · MIT 오픈소스 ·
+      iCloud를 쓰면 <b>iPhone·iPad에도 자동 동기화</b>됩니다</p>
+  </header>
+
+  <section id="install">
+    <h2>설치 — 1분</h2>
+    <p class="sub">Hammerspoon 같은 별도 프로그램 없이, 맥에 원래 있는 「텍스트 대치」 기능만 씁니다.</p>
+    <ol class="steps">
+      <li>
+        <h3>텍스트 대치 파일 받기</h3>
+        <p>아래 버튼을 누르면 <span class="path">특수문자_텍스트대치.plist</span> 가 다운로드 폴더에 저장돼요.</p>
+        <a class="inline-dl" href="@@PLIST@@" download="특수문자_텍스트대치.plist">⬇ 다운로드 (@@PLIST_KB@@KB)</a>
+      </li>
+      <li>
+        <h3>시스템 설정 → 키보드 → 텍스트 대치… 열기</h3>
+        <p>화면 왼쪽 위 <b>Apple 메뉴</b> → 시스템 설정 → <b>키보드</b> → 아래쪽 <b>텍스트 대치…</b> 버튼</p>
+      </li>
+      <li>
+        <h3>받은 파일을 목록 안으로 드래그</h3>
+        <p>목록에 @@COUNT@@개가 한 번에 추가됩니다. 이제 한글 모드에서 <b>ㅁ별</b> + 스페이스 → <b>★</b>.
+        되돌리려면 변환 직후 <b>⌘Z</b>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="symbols">
+    <h2>이런 기호들이 들어 있어요</h2>
+    <p class="sub">모든 단축어는 <b>ㅁ</b> 로 시작합니다 — 한글 타이핑에서 「ㅁ+글자」는 자연스럽게 나오지 않아 오작동이 없어요. 눌러보면 복사됩니다.</p>
+    <div class="symbols" id="sym-grid"></div>
+    <a class="more" href="cheatsheet.html">전체 @@COUNT@@개 치트시트 보기 → (검색 · 즐겨찾기 · 외우기 퀴즈)</a>
+  </section>
+
+  <section id="palette">
+    <h2>⌥ Space 팔레트 — 선택</h2>
+    <p class="sub">단축어를 외우기 싫다면. @@COUNT@@개가 버튼 그리드로 한 화면에 뜨고, 눌러서 바로 입력합니다. Hammerspoon이 필요해요.</p>
+    <img class="shot" src="palette.png" alt="⌥Space를 누르면 뜨는 특수문자 팔레트 — 기호가 카테고리별 버튼 그리드로 배열되어 있다" loading="lazy">
+    <div class="code-wrap">
+      <pre class="code" id="code"><span class="c"># Hammerspoon이 없다면</span>
+brew install --cask hammerspoon
+
+git clone @@REPO@@.git
+cd mac-special-chars && ./install.sh</pre>
+      <button class="copy-code" id="copy-code">복사</button>
+    </div>
+    <table class="keys">
+      <tr><td><span class="k">⌥ Space</span></td><td>팔레트 열기 · 다시 누르면 닫기</td></tr>
+      <tr><td><span class="k">←→↑↓</span></td><td>커서 이동 · <span class="k">Enter</span> 커서 위치에 입력</td></tr>
+      <tr><td><span class="k">⌘ Enter</span></td><td>입력하지 않고 복사만</td></tr>
+      <tr><td><span class="k">⇧ Enter</span></td><td>입력하고 닫지 않기 (연속 입력)</td></tr>
+      <tr><td>검색</td><td>이름 · 단축어 · 초성(<b>ㅂㅈ</b>→별점) · 영문(<b>star</b>) · 유니코드(<b>U+2605</b>)</td></tr>
+      <tr><td><span class="k">?</span></td><td>팔레트 안에서 전체 단축키 보기</td></tr>
+    </table>
+  </section>
+
+  <section id="faq">
+    <h2>자주 묻는 것</h2>
+    <details>
+      <summary>단축어를 쳤는데 안 바뀌어요</summary>
+      <p><b>한글 입력 상태</b>에서 단축어를 치고 <b>스페이스</b>를 눌러야 바뀝니다. 영문 모드에서는 동작하지 않아요.
+      그래도 안 되면 시스템 설정 → 키보드 → 텍스트 대치 목록에 항목이 들어갔는지 확인하세요.</p>
+    </details>
+    <details>
+      <summary>일부 앱에서만 안 돼요</summary>
+      <p>텍스트 대치는 macOS 표준 텍스트 입력 필드에서 동작합니다. 자체 입력기를 쓰는 일부 앱
+      (터미널, 일부 Electron·게임 앱, VS Code 등)에서는 적용되지 않아요. 그런 앱에서는 <b>⌥ Space 팔레트</b>를 쓰면 됩니다.</p>
+    </details>
+    <details>
+      <summary>iPhone·iPad에서도 되나요</summary>
+      <p>됩니다. 맥과 같은 iCloud 계정을 쓰고 「iCloud → 설정 및 데이터 동기화」가 켜져 있으면
+      텍스트 대치 목록이 자동으로 넘어갑니다. 몇 분 걸릴 수 있어요.</p>
+    </details>
+    <details>
+      <summary>기호를 추가하거나 바꾸고 싶어요</summary>
+      <p>저장소를 받아 <code>entries.json</code> 을 고치고 <code>python3 scripts/build.py</code> 를 돌리면
+      plist · 치트시트 · 팔레트가 한 번에 다시 만들어집니다. 연락처·계좌번호처럼 공개하면 안 되는 값은
+      <code>entries.local.json</code> (git 제외) 에 넣으세요.</p>
+    </details>
+    <details>
+      <summary>지우고 싶으면요</summary>
+      <p>시스템 설정 → 키보드 → 텍스트 대치에서 항목을 선택하고 <b>−</b> 버튼을 누르면 됩니다.
+      팔레트는 저장소에서 <code>./uninstall.sh</code>.</p>
+    </details>
+  </section>
+
+  <footer>
+    <span>ㅁ 특수문자 단축어 v@@VERSION@@</span>
+    <a href="@@REPO@@">GitHub</a>
+    <a href="@@REPO@@/archive/refs/heads/main.zip">전체 ZIP 받기</a>
+    <a href="cheatsheet.html">치트시트</a>
+    <span class="sp"></span>
+    <span>MIT License</span>
+  </footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const PREVIEW = __PREVIEW__;
+const DEMO = __DEMO__;
+
+/* ---------- 토스트 ---------- */
+let toastT;
+const toastEl = document.getElementById("toast");
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => toastEl.classList.remove("on"), 1600);
+}
+
+/* ---------- 기호 미리보기 ---------- */
+const grid = document.getElementById("sym-grid");
+grid.innerHTML = PREVIEW.map(e =>
+  `<button class="sym" data-p="${e.p}" aria-label="${e.n} ${e.p} — 누르면 복사">` +
+  `<span class="g">${e.p}</span><span class="s">${e.s}</span></button>`
+).join("");
+grid.addEventListener("click", ev => {
+  const b = ev.target.closest(".sym");
+  if (!b) return;
+  const ch = b.dataset.p;
+  navigator.clipboard.writeText(ch)
+    .then(() => toast(`${ch} 복사했어요`))
+    .catch(() => toast("복사에 실패했어요"));
+});
+
+/* ---------- 타이핑 데모 ---------- */
+const inEl = document.getElementById("d-in");
+const outEl = document.getElementById("d-out");
+const spEl = document.getElementById("d-space");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+if (reduce) {
+  inEl.textContent = DEMO[0].s;
+  outEl.textContent = DEMO[0].p;
+} else {
+  let i = 0;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  (async function loop() {
+    for (;;) {
+      const d = DEMO[i % DEMO.length];
+      i++;
+      inEl.textContent = "";
+      outEl.textContent = "";
+      await wait(420);
+      for (const ch of [...d.s]) {
+        inEl.textContent += ch;
+        await wait(115);
+      }
+      await wait(360);
+      spEl.classList.add("hit");
+      await wait(160);
+      spEl.classList.remove("hit");
+      inEl.textContent = "";
+      outEl.textContent = d.p;
+      await wait(1700);
+    }
+  })();
+}
+
+/* ---------- 코드 복사 ---------- */
+document.getElementById("copy-code").addEventListener("click", () => {
+  const txt = document.getElementById("code").innerText;
+  navigator.clipboard.writeText(txt)
+    .then(() => toast("설치 명령을 복사했어요"))
+    .catch(() => toast("복사에 실패했어요"));
+});
+
+/* ---------- 다운로드 안내 ---------- */
+document.getElementById("dl").addEventListener("click", () => {
+  setTimeout(() => toast("받은 파일을 시스템 설정 → 키보드 → 텍스트 대치에 드래그하세요"), 400);
+});
+</script>
+</body>
+</html>

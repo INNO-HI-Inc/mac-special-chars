@@ -4,11 +4,14 @@
 
 `ㅁ별`+스페이스 → ★ · `ㅁ참고` → ※ · `ㅁ1` → ① · `ㅁ제곱미터` → ㎡ … **총 100개**
 
-**치트시트(웹)**: [`index.html`](./index.html) 을 브라우저로 열면 됩니다 — 검색(초성·영문 별칭 지원), 클릭 복사, 즐겨찾기, 외우기 퀴즈
+**▶ 웹사이트: https://inno-hi-inc.github.io/mac-special-chars/**
+설치 파일 다운로드 · 설치 안내 · 치트시트가 전부 여기 있습니다. 저장소를 받지 않아도 돼요.
+
+**치트시트**: [웹](https://inno-hi-inc.github.io/mac-special-chars/cheatsheet.html) 또는 로컬 [`index.html`](./index.html) — 검색(초성·영문 별칭 지원), 클릭 복사, 즐겨찾기, 외우기 퀴즈
 
 ## 1. 텍스트 대치 설치 — 필수, 1분
 
-1. [`특수문자_텍스트대치.plist`](./특수문자_텍스트대치.plist) 를 다운로드 (Raw → ⌘S)
+1. [웹사이트에서 다운로드](https://inno-hi-inc.github.io/mac-special-chars/) — 또는 저장소의 [`특수문자_텍스트대치.plist`](./특수문자_텍스트대치.plist) 를 Raw → ⌘S
 2. **시스템 설정 → 키보드 → 텍스트 대치…** 열기
 3. plist 파일을 목록 안으로 **드래그**
 4. 끝 — 한글 모드에서 `ㅁ별` + 스페이스를 누르면 ★이 됩니다. iCloud를 쓰면 iPhone·iPad에도 자동 동기화돼요.
@@ -231,6 +234,8 @@ python3 scripts/build.py && ./install.sh
 python3 scripts/build.py --check      # 검증만 (파일 안 씀)
 python3 scripts/build.py --watch      # 소스 바뀌면 자동 재빌드
 python3 scripts/smoke.py              # 스모크 테스트 (개인정보 격리 포함)
+python3 scripts/site.py               # Pages 배포용 _site/ 조립
+python3 -m http.server -d _site 8080  # 사이트 로컬 미리보기
 python3 scripts/textreplace.py        # 시스템 텍스트 대치 등록 현황 비교
 python3 scripts/textreplace.py --backup   # 현재 등록분 백업
 ./uninstall.sh                        # 팔레트 제거
@@ -280,6 +285,28 @@ Hammerspoon이 실행 중인지, `~/.hammerspoon/init.lua` 에
 - 마우스 없이 전부 조작 가능 (`?` 로 단축키 확인)
 - 고대비 모드 (`palette.highContrast`), 글자 크기 3단계
 - `prefers-reduced-motion` 존중
+
+## 배포
+
+`main` 에 푸시하면 [`.github/workflows/pages.yml`](./.github/workflows/pages.yml) 이
+검증 → 사이트 조립 → GitHub Pages 배포를 자동으로 합니다.
+
+| 단계 | 하는 일 |
+|---|---|
+| `build.py --check` | entries.json 스키마·단축어 규칙 검증 |
+| `smoke.py` | 산출물 일치·**개인정보 격리** 검사 (커밋 히스토리 포함) |
+| `site.py` | `_site/` 조립 — 랜딩·치트시트·plist·스크린샷 |
+
+사이트에는 공개 산출물만 올라갑니다. `.local.` 파일이 `_site/` 에 섞이면 빌드가 멈춥니다.
+
+| 주소 | 내용 |
+|---|---|
+| https://inno-hi-inc.github.io/mac-special-chars/ | 랜딩 — 다운로드 · 설치 안내 |
+| https://inno-hi-inc.github.io/mac-special-chars/cheatsheet.html | 치트시트 |
+| https://inno-hi-inc.github.io/mac-special-chars/mac-special-chars.plist | 텍스트 대치 파일 (직접 링크) |
+
+랜딩 문구는 [`template/landing_template.html`](./template/landing_template.html) 에서 고칩니다.
+기호 개수·버전·파일 크기는 빌드 때 자동으로 채워집니다.
 
 ## 버전
 

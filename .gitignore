@@ -14,3 +14,6 @@ special_chars_seals_order.txt
 entries.local.json
 특수문자_텍스트대치.local.plist
 hammerspoon/special_chars_palette.local.html
+
+# Pages 빌드 산출물
+_site/

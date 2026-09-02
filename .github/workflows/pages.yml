@@ -1,0 +1,55 @@
+# entries.json → 산출물 검증 → _site 조립 → GitHub Pages 배포
+# main 에 푸시될 때마다 https://inno-hi-inc.github.io/mac-special-chars/ 가 갱신된다.
+name: Pages 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 겹치지 않게 — 진행 중인 배포를 취소하지는 않는다
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 빌드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # smoke.py 가 커밋 히스토리까지 훑는다
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 산출물 검증
+        run: python3 scripts/build.py --check
+
+      - name: 스모크 테스트 (개인정보 격리 포함)
+        run: python3 scripts/smoke.py
+
+      - name: 사이트 조립
+        run: python3 scripts/site.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: 배포
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

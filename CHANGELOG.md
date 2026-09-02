@@ -1,5 +1,21 @@
 # 변경 기록
 
+## 미출시
+
+### 배포 — GitHub Pages
+
+저장소를 받지 않아도 웹에서 바로 내려받아 설치할 수 있게 했습니다.
+<https://inno-hi-inc.github.io/mac-special-chars/>
+
+- `template/landing_template.html` — 다운로드 랜딩 페이지.
+  타이핑 데모, 3단계 설치 안내, 필수 기호 미리보기(눌러서 복사), 팔레트 안내, FAQ.
+  기호 개수·버전·plist 크기는 빌드 때 `entries.json` 에서 채워집니다.
+- `scripts/site.py` — `_site/` 조립 (랜딩 · 치트시트 · plist · 스크린샷).
+  `.local.` 산출물이 섞이면 빌드를 멈춥니다. `--check` 로 검증만 할 수 있습니다.
+- `.github/workflows/pages.yml` — `main` 푸시마다
+  `build.py --check` → `smoke.py` → `site.py` → Pages 배포.
+- 치트시트에 랜딩으로 돌아가는 링크 추가 (사이트 빌드에서만 삽입).
+
 ## 1.1.0 — 2026-08-25
 
 팔레트를 크게 손봤습니다. 개인 항목(연락처·서명)을 공개 저장소와 분리하는
